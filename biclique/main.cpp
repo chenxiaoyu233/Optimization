@@ -22,8 +22,9 @@ bool cmp_by_du(const Node &a, const Node &b) { return a.du > b.du; }
 bool cmp_by_id(const Node &a, const Node &b) { return a.idx < b.idx; }
 
 
-vector<int> from[maxn];
 vector<pair<int, int> > edges;
+vset neighborSet[maxn];
+vset rankSet[maxn];
 
 void read_input(string filePath) {
 	FILE *in = fopen(filePath.c_str(), "r");
@@ -43,21 +44,26 @@ void read_input(string filePath) {
 			--a; --b;
 			++ node[a].du; ++ node[b].du;
 			edges.push_back(make_pair(a, b));
-			from[a].push_back(b); from[b].push_back(a);
+			neighborSet[a].set(b); neighborSet[b].set(a);
 		}
 	}
 }
 
+int last = 0;
+void resetLast() { last = 0; }
 int firstElementOfBitset(vset &Q) {
-	for(int i = 0; i < n; i++) if(Q[node_rk[i].idx]) return node_rk[i].idx;
+	for(int i = last; i < n; i++) if(Q[node_rk[i].idx]) return node_rk[i].idx;
 }
-
-vset neighbor;
-void getNeighbor(int idx) {
-	neighbor.reset();
-	for(int i = 0; i < from[idx].size(); i++) {
-		neighbor.set(from[idx][i]);
+vset tmpSet;
+int searchFirstElementOfBitSet(vset &Q) {
+	int l = -1, r = n-1; // rankSet[r] & Q != 0
+	while(l + 1 < r) {
+		int mid = (l + r) >> 1;
+		tmpSet = rankSet[mid] & Q;
+		if(tmpSet.any()) r = mid;
+		else l = mid;
 	}
+	return node_rk[r].idx;
 }
 
 pair<vector<int>*, vector<int>*> cliqueSort(bitset<maxn> P) {
@@ -66,11 +72,12 @@ pair<vector<int>*, vector<int>*> cliqueSort(bitset<maxn> P) {
 	int k = 1;
 	while(P.any()) {
 		bitset<maxn> Q = P;
+		resetLast();
 		while(Q.any()) {
-			int v = firstElementOfBitset(Q);
+			//int v = firstElementOfBitset(Q);
+			int v = searchFirstElementOfBitSet(Q);
 			P.set(v, 0);
-			getNeighbor(v);
-			Q &= neighbor;
+			Q &= neighborSet[v];
 			bounds -> push_back(k);
 			order -> push_back(v);
 		}
@@ -93,8 +100,8 @@ void expand(vset *A, vset *B, vset *Pa, vset *Pb, vset *Am, vset *Bm) {
 			++A_cnt;
 
 			vset *nPa = new vset(), *nPb = new vset();
-			getNeighbor(v); (*nPb) = *Pb & neighbor;
-			neighbor.flip(); (*nPa) = *Pa & neighbor;
+			(*nPb) = *Pb & neighborSet[v];
+			neighborSet[v].flip(); (*nPa) = *Pa & neighborSet[v]; neighborSet[v].flip();
 
 			if(A_cnt == B_cnt && A_cnt > Am_cnt) { // update the ans
 				*Am = *A; *Bm = *B;
@@ -102,7 +109,7 @@ void expand(vset *A, vset *B, vset *Pa, vset *Pb, vset *Am, vset *Bm) {
 			}
 
 			swap(A_cnt, B_cnt);
-			if(nPb -> count()) expand(B, A, nPb, nPa, Bm, Am);
+			if(nPb -> any()) expand(B, A, nPb, nPa, Bm, Am);
 			swap(A_cnt, B_cnt);
 
 			delete nPa; delete nPb; // 回收内存空间
@@ -111,7 +118,7 @@ void expand(vset *A, vset *B, vset *Pa, vset *Pb, vset *Am, vset *Bm) {
 
 			if(B_cnt == 0) Pb -> set(v, 0);
 		}else {
-			return;
+			break;
 		}
 	}
 }
@@ -130,6 +137,8 @@ void improvedBiclique() {
 	for(int i = 0; i < n; i++) {
 		node[i].rank = i;
 		node_rk[i] = node[i];
+		if (i > 0) rankSet[i] = rankSet[i-1];
+		rankSet[i].set(node_rk[i].idx);
 	}
 	sort(node, node + n, cmp_by_id);
 
