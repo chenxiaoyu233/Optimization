@@ -5,6 +5,7 @@
 
 class KDefectiveBase {
 	protected:
+	int ans; // 用于统计答案
 	int size; // 图的规模
 	int *dis; // 用于计算
 	vector <int> *from; // 邻接链表;
@@ -51,13 +52,13 @@ class KDefectiveBase {
 	virtual void prework(void *P, void *C);
 
 	void init();
-	int solve(void *_P, void *_C, int k, int m);
+	void solve(void *_P, void *_C, int k, int m);
 
 	public:
 	KDefectiveBase(int n);
 	~KDefectiveBase();
 
-	void Solve(int k);
+	int Solve(int k);
 	void AddEdge(int a, int b);
 };
 

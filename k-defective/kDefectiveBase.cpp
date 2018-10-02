@@ -98,12 +98,8 @@ bool KDefectiveBase::couldRecudeM(void *P, void *C) {
 	bool flag = false;
 	int sz = this -> sizeOfSet(P);
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
-		void *nei = this -> neighborSetOf(i);
-		void *neiInP = this -> setIntersection(P, nei);
-		if(sz > this -> sizeOfSet(neiInP)) flag = true;
-		this -> deleteSet(nei);
-		this -> deleteSet(neiInP);
-		if (flag) break;
+		int need = this -> calcNeedEdge(P, C, i);
+		if (need > 0){ flag = true; break; }
 	}
 	return flag;
 }
@@ -154,7 +150,7 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	}
 }
 
-int KDefectiveBase::solve(void *P, void *C, int k, int m) {
+void KDefectiveBase::solve(void *P, void *C, int k, int m) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
 
@@ -165,6 +161,8 @@ int KDefectiveBase::solve(void *P, void *C, int k, int m) {
 
 	// update ans
 	if (sizeOfSet(C) == 0) {
+		ans = max(ans, sizeOfSet(P));
+		return;
 	}
 
 	// branch
@@ -182,7 +180,7 @@ int KDefectiveBase::Solve(int k) {
 	init();
 	void *P = this -> newSet(), *C = this -> newSet();
 	prework(P, C);
-	int ans = solve(P, C, k, k);
+	solve(P, C, k, k);
 	this -> deleteSet(P); this -> deleteSet(C);
 	return ans;
 }
