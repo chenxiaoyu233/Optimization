@@ -10,7 +10,7 @@ class KDefectiveBase {
 	int *dis; // 用于计算
 	vector <int> *from; // 邻接链表;
 
-	virtual void __init__() = 0; // special initial for subclass
+	virtual void __init__(void *P, void *C) = 0; // special initial for subclass
 
 	// virtual API for set Operation
 	virtual void addVertexToSet(void *ptr, int idx) = 0;
@@ -42,7 +42,7 @@ class KDefectiveBase {
 	virtual int calcNeedEdge(void *P, void *C, int idx);
 
 	// calc the order for branch
-	bool cmpForOrder(const pair<int, int> &a, const pair<int, int> &b);
+	static bool cmpForOrder(const pair<int, int> &a, const pair<int, int> &b);
 	void calcBranchOrder(void *P, void *C, vector<pair<int, int> > &order);
 
 	virtual void branchWhenCouldNotReduceM(void *P, void *C, int k, int m);
@@ -51,7 +51,7 @@ class KDefectiveBase {
 
 	virtual void prework(void *P, void *C);
 
-	void init();
+	void init(void *P, void *C);
 	void solve(void *_P, void *_C, int k, int m);
 
 	public:

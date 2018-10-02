@@ -17,15 +17,15 @@ void KDefectiveBase::prework(void *P, void *C) {
 	// @todo
 }
 
-void KDefectiveBase::init() {
+void KDefectiveBase::init(void *P, void *C) {
 	for (int i = 0; i < size; i++) {
 		from[i].clear();
 	}
-	this -> __init__(); 
+	this -> __init__(P, C); 
 }
 
 int KDefectiveBase::calcNeedEdge(void *P, void *C, int idx) {
-	void *nei = this -> neighborSetOf(i);
+	void *nei = this -> neighborSetOf(idx);
 	void *neiInP = this -> setIntersection(P, nei);
 	int need = this -> sizeOfSet(P) - this -> sizeOfSet(neiInP);
 	this -> deleteSet(nei); this -> deleteSet(neiInP);
@@ -71,7 +71,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	int maxDiam = this -> calcLimOfDiam(P, C, k);
 	for (int i = 0; i < size; i++) if(this -> existsInSet(C, i)) {
-		this -> calcDisFrom(i);
+		this -> calcDisFrom(P, C, i);
 		int diam = 0;
 		for (int j = 0; j < size; j++) if(this -> existsInSet(P, j)) diam = max(diam, dis[j]);
 		if ( diam > maxDiam ) this -> removeVertexFromSet(C, i);
@@ -129,13 +129,13 @@ void KDefectiveBase::calcBranchOrder(void *P, void *C, vector<pair<int, int> > &
 		int need = this -> calcNeedEdge(P, C, i);
 		order.push_back(make_pair(i, need));
 	}
-	sort(order.begin(), order.end(), this -> cmpForOrder);
+	sort(order.begin(), order.end(), cmpForOrder);
 }
 
 void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	vector<pair<int, int> > order;
 	this -> calcBranchOrder(P, C, order);
-	this -> removeVertexFromSet(C, order[0]);
+	this -> removeVertexFromSet(C, order[0].first);
 	solve(P, C, k, m);
 	for (int i = 0; i < (int)order.size() - 1; i++) {
 		int need = order[i].second;
@@ -150,7 +150,7 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	}
 }
 
-void KDefectiveBase::solve(void *P, void *C, int k, int m) {
+void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
 
@@ -177,8 +177,8 @@ void KDefectiveBase::solve(void *P, void *C, int k, int m) {
 }
 
 int KDefectiveBase::Solve(int k) {
-	init();
 	void *P = this -> newSet(), *C = this -> newSet();
+	init(P, C);
 	prework(P, C);
 	solve(P, C, k, k);
 	this -> deleteSet(P); this -> deleteSet(C);
