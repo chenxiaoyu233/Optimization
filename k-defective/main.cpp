@@ -19,6 +19,7 @@ void read_input(string filePath) {
 			solver = new KDefectiveBitset<bitset<1000> >(n);
 		}else if(flag == 'e') { // edge
 			int a, b; fscanf(in, " %d%d", &a, &b);
+			--a; --b; // 从 0 开始编号
 			solver -> AddEdge(a, b);
 		}
 	}
@@ -30,7 +31,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	read_input(string(argv[1]));
-	solver -> Solve(atoi(argv[2]));
+	int ans = solver -> Solve(atoi(argv[2]));
+	printf("%d\n", ans);
 	return 0;
 }
 

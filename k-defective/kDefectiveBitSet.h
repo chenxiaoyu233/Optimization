@@ -27,7 +27,8 @@ KDefectiveBitset<Bitset>::KDefectiveBitset(int n) : KDefectiveBase(n) { }
 template <class Bitset>
 void KDefectiveBitset<Bitset>::__init__(void *P, void *C) {
 	Bitset *__P__ = (Bitset*) P, *__C__ = (Bitset*) C;
-	__P__ -> reset(); __C__ -> set();
+	__P__ -> reset(); 
+	for (int i = 0; i < size; i++) __C__ -> set(i);
 }
 
 template <class Bitset>

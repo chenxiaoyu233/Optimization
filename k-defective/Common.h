@@ -9,6 +9,7 @@
 #include <cmath>
 #include <queue>
 #include <utility>
+#include <bitset>
 
 using namespace std;
 

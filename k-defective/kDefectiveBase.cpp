@@ -2,10 +2,15 @@
 
 KDefectiveBase::KDefectiveBase(int n): size(n) {
 	from = new vector<int>[n];
+	for (int i = 0; i < size; i++) {
+		from[i].clear();
+	}
+	dis = new int[n];
 }
 
 KDefectiveBase::~KDefectiveBase() {
 	delete[] from;
+	delete[] dis;
 }
 
 void KDefectiveBase::AddEdge(int a, int b) {
@@ -18,9 +23,6 @@ void KDefectiveBase::prework(void *P, void *C) {
 }
 
 void KDefectiveBase::init(void *P, void *C) {
-	for (int i = 0; i < size; i++) {
-		from[i].clear();
-	}
 	this -> __init__(P, C); 
 }
 
@@ -40,7 +42,7 @@ void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 }
 
 int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
-	int sz = this -> sizeOfSet(P) + 1;
+	int sz = this -> sizeOfSet(P) + this -> sizeOfSet(C);
 	if (k < sz - 1) return 2;
 	// @todo add 周老师提的约束
 	return sz - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
@@ -138,16 +140,19 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	this -> removeVertexFromSet(C, order[0].first);
 	solve(P, C, k, m);
 	for (int i = 0; i < (int)order.size() - 1; i++) {
-		int need = order[i].second;
+		int need = this -> calcNeedEdge(P, C, order[i].first); // 这里需要重新计算
 		if (need > m) return; 
 		m -= need;
 		addVertexToSet(P, order[i].first);
-
-		// 如果是最后一个点, 就不从C中删除了, 不然会少枚举一种情况
-		if (i + 1 < (int)order.size() - 1) removeVertexFromSet(C, order[i+1].first);
-
+		removeVertexFromSet(C, order[i+1].first);
 		solve(P, C, k, m);
 	}
+	int last = (int)order.size() - 1;
+	int need = this -> calcNeedEdge(P, C, order[last].first);
+	if (need > m) return;
+	m -= need;
+	addVertexToSet(P, order[last].first);
+	solve(P, C, k, m);
 }
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
