@@ -86,7 +86,8 @@ void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
 		void *nei = this -> neighborSetOf(i);
 		void *neiP = this -> setIntersection(P, nei);
 		void *neiC = this -> setIntersection(C, nei);
-		if (this -> sizeOfSet(neiP) + this -> sizeOfSet(neiC) == szP + szC) {
+		if (this -> sizeOfSet(neiP) + this -> sizeOfSet(neiC) == szP + szC - 1) { 
+			// 减去1, 因为在计算的时候没有包含自己
 			this -> removeVertexFromSet(C, i);
 			this -> addVertexToSet(P, i);
 		}
@@ -98,7 +99,6 @@ void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
 
 bool KDefectiveBase::couldRecudeM(void *P, void *C) { 
 	bool flag = false;
-	int sz = this -> sizeOfSet(P);
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		int need = this -> calcNeedEdge(P, C, i);
 		if (need > 0){ flag = true; break; }
@@ -109,8 +109,9 @@ bool KDefectiveBase::couldRecudeM(void *P, void *C) {
 void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		this -> removeVertexFromSet(C, i);
-		solve(P, C, k, m);
 		this -> addVertexToSet(P, i);
+		solve(P, C, k, m);
+		this -> removeVertexFromSet(P, i);
 		solve(P, C, k, m);
 
 		// recover
@@ -134,7 +135,7 @@ void KDefectiveBase::calcBranchOrder(void *P, void *C, vector<pair<int, int> > &
 	sort(order.begin(), order.end(), cmpForOrder);
 }
 
-void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
+/*void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	vector<pair<int, int> > order;
 	this -> calcBranchOrder(P, C, order);
 	this -> removeVertexFromSet(C, order[0].first);
@@ -153,6 +154,42 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	m -= need;
 	addVertexToSet(P, order[last].first);
 	solve(P, C, k, m);
+}*/
+void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
+	vector <pair<int, int> > order;
+	this -> calcBranchOrder(P, C, order);
+
+	// 计算需要边数的前缀和并存在 order[i].second 中
+	for (int i = 0, sum = 0; i < order.size(); i++) {
+		int need = this -> calcNeedEdge(P, C, order[i].first);
+		sum += need; 
+		order[i].second = sum;
+		this -> addVertexToSet(P, order[i].first);
+	}
+
+	// 将之前的计算还原
+	for (int i = 0; i < order.size(); i++)
+		this -> removeVertexFromSet(P, order[i].first);
+
+	order.push_back(make_pair(-1, m + 1)); // 放一个标兵
+	// 进行最后一个分支, 比较特殊, 需要专门写
+	int endPos = -1;
+	for (int i = 0; i < order.size(); i++) {
+		if (order[i].second > m) { endPos = i; break; }
+		this -> addVertexToSet(P, order[i].first);
+		this -> removeVertexFromSet(C, order[i].first);
+	}
+	if (endPos == -1) return;
+	endPos -= 1;
+	solve(P, C, k, m - order[endPos].second);
+
+	//解决其他分支
+	for (int i = endPos; i >= 0; i--) {
+		if (i < endPos) this -> addVertexToSet(C, order[i+1].first);
+		this -> removeVertexFromSet(P, order[i].first);
+		if (i > 0) solve(P, C, k, m - order[i-1].second);
+		else solve(P, C, k, m);
+	}
 }
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
@@ -164,9 +201,14 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	this -> reductionByDiam(P, C, k);
 	this -> reductionByConnectToAll(P, C);
 
+	// cut brunch
+    printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
+	if (sizeOfSet(P) + sizeOfSet(C) <= ans) return;
+	
 	// update ans
 	if (sizeOfSet(C) == 0) {
 		ans = max(ans, sizeOfSet(P));
+		printf("new ans: %d\n", ans);
 		return;
 	}
 
