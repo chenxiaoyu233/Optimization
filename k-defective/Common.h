@@ -10,6 +10,9 @@
 #include <queue>
 #include <utility>
 #include <bitset>
+#include <cstdlib>
+#include <ctime>
+#include <cstdint>
 
 using namespace std;
 

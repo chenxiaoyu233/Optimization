@@ -44,7 +44,13 @@ void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
 	int sz = this -> sizeOfSet(P) + this -> sizeOfSet(C);
 	if (k < sz - 1) return 2;
-	// @todo add 周老师提的约束
+
+	// 根据保证连通这个前提计算出的直径大小 -> 待验算
+	float delta = 4 * sz * sz - 12 * sz + 17 - 8 * k;
+	if (delta >= 0) {
+		return ((2 * (float)sz + 1) - sqrt(delta))/(float)2;
+	}
+
 	return sz - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
 }
 
@@ -106,7 +112,7 @@ bool KDefectiveBase::couldRecudeM(void *P, void *C) {
 	return flag;
 }
 
-void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
+/*void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		this -> removeVertexFromSet(C, i);
 		this -> addVertexToSet(P, i);
@@ -120,6 +126,26 @@ void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
 
 		break;
 	}
+}*/
+void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
+	int whe = -1, maxv = -1;
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
+		void *nei = this -> neighborSetOf(i);
+		void *neiC = this -> setIntersection(C, nei);
+		int sz = this -> sizeOfSet(neiC);
+		if (sz > maxv) {
+			maxv = sz; whe = i;
+		}
+		this -> deleteSet(nei);
+		this -> deleteSet(neiC);
+	}
+	this -> removeVertexFromSet(C, whe);
+	this -> addVertexToSet(P, whe);
+	solve(P, C, k, m);
+	this -> removeVertexFromSet(P, whe);
+	solve(P, C, k, m);
+
+	this -> addVertexToSet(C, whe);
 }
 
 bool KDefectiveBase::cmpForOrder(const pair<int, int> &a, const pair<int, int> &b) {
@@ -202,13 +228,13 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	this -> reductionByConnectToAll(P, C);
 
 	// cut brunch
-    printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
+    //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
 	if (sizeOfSet(P) + sizeOfSet(C) <= ans) return;
 	
 	// update ans
 	if (sizeOfSet(C) == 0) {
 		ans = max(ans, sizeOfSet(P));
-		printf("new ans: %d\n", ans);
+		//printf("new ans: %d\n", ans);
 		return;
 	}
 
