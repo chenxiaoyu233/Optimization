@@ -18,8 +18,23 @@ void KDefectiveBase::AddEdge(int a, int b) {
 	from[b].push_back(a);
 }
 
-void KDefectiveBase::prework(void *P, void *C) {
-	// @todo
+void KDefectiveBase::prework(void *_P, void *_C, int k) {
+	void *P = this -> newSet(), *C = this -> newSet();
+	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
+
+	vector <int> vec; vec.clear();
+	for (int i = 0; i < size; i++) vec.push_back(i);
+	random_shuffle(vec.begin(), vec.end());
+	for (int i = 0; i < size; i++) {
+		int need = this -> calcNeedEdge(P, C, i);
+		if (need > k) continue;
+		k -= need;
+		this -> addVertexToSet(P, i);
+	}
+	ans = max(ans, this -> sizeOfSet(P));
+
+	this -> deleteSet(P);
+	this -> deleteSet(C);
 }
 
 void KDefectiveBase::init(void *P, void *C) {
@@ -234,7 +249,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	// update ans
 	if (sizeOfSet(C) == 0) {
 		ans = max(ans, sizeOfSet(P));
-		//printf("new ans: %d\n", ans);
+		printf("new ans: %d\n", ans);
 		return;
 	}
 
@@ -250,9 +265,11 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 }
 
 int KDefectiveBase::Solve(int k) {
+    ans = 0; // init the value of the ans
 	void *P = this -> newSet(), *C = this -> newSet();
 	init(P, C);
-	prework(P, C);
+	for (int i = 0; i < 500; i++) prework(P, C, k);
+    printf("new ans: %d\n", ans);
 	solve(P, C, k, k);
 	this -> deleteSet(P); this -> deleteSet(C);
 	return ans;

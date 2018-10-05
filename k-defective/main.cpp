@@ -30,6 +30,7 @@ void solve(string solverT, string filePath, int k) {
 			}
 		}
 	}
+    fclose(in);
 	int ans = 0;
 	if (solverT == "algo")
 		ans = ((KDefectiveBase*) solver) -> Solve(k);
