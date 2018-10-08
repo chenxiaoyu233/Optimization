@@ -4,6 +4,8 @@
 #include "kDefective.h"
 #include "GraphGenerator.h"
 #include "BaoSolver.h"
+#include "kDefectiveRDS.h"
+#include "kDefectiveRDSBitSet.h"
 using namespace std;
 
 void *solver;
@@ -20,6 +22,7 @@ void solve(string solverT, string filePath, int k) {
 			fscanf(in, " %*s%d%d", &n, &m);
 			if (solverT == "algo") solver = new KDefectiveBitset<bitset<1000> >(n);
 			else if (solverT == "bao") solver = new BaoSolver(n);
+            else if (solverT == "RDS") solver = new KDefectiveRDSBitSet<bitset<1000> >(n);
 		}else if(flag == 'e') { // edge
 			int a, b; fscanf(in, " %d%d", &a, &b);
 			--a; --b; // 从 0 开始编号
@@ -27,7 +30,9 @@ void solve(string solverT, string filePath, int k) {
 				((KDefectiveBase*) solver) -> AddEdge(a, b);
 			} else if(solverT == "bao") {
 				((BaoSolver*) solver) -> AddEdge(a, b);
-			}
+            } else if(solverT == "RDS") {
+                ((KDefectiveRDS*) solver) -> AddEdge(a, b);
+            }
 		}
 	}
     fclose(in);
@@ -36,6 +41,8 @@ void solve(string solverT, string filePath, int k) {
 		ans = ((KDefectiveBase*) solver) -> Solve(k);
 	else if (solverT == "bao")
 		ans = ((BaoSolver*) solver) -> Solve(k);
+    else if (solverT == "RDS")
+        ans = ((KDefectiveRDS*) solver) -> Solve(k);
 	printf("%d\n", ans);
 }
 
@@ -48,7 +55,7 @@ int main(int argc, char** argv) {
 	}
 	if (string(argv[1]) == "gen") {
 		gen.Generate(atoi(argv[2]), atof(argv[3]), 0.0001);
-	} else if (string(argv[1]) == "algo" || string(argv[1]) == "bao") {
+	} else if (string(argv[1]) == "algo" || string(argv[1]) == "bao" || string(argv[1]) == "RDS") {
 		solve(string(argv[1]), string(argv[2]), atoi(argv[3]));
 	} else {
 		puts("invalid arguments");

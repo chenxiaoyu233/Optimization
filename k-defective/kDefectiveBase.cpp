@@ -169,7 +169,7 @@ bool KDefectiveBase::cmpForOrder(const pair<int, int> &a, const pair<int, int> &
 
 void KDefectiveBase::calcBranchOrder(void *P, void *C, vector<pair<int, int> > &order) {
 	order.clear();
-	for (int i = 0; i < size; i++) if (existsInSet(C, i)) {
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		int need = this -> calcNeedEdge(P, C, i);
 		order.push_back(make_pair(i, need));
 	}
