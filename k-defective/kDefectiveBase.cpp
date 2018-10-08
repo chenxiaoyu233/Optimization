@@ -234,6 +234,8 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 }
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
+    if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
+    
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
 
