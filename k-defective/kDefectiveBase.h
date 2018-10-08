@@ -5,6 +5,7 @@
 
 class KDefectiveBase {
 	protected:
+    clock_t st, ed; // 用于计时
 	int ans; // 用于统计答案
 	int size; // 图的规模
 	int *dis; // 用于计算

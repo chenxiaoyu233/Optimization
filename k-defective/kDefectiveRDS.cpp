@@ -34,6 +34,7 @@ int KDefectiveRDS::minInSet(void *C) {
 }
 
 int KDefectiveRDS::calcNeedEdge(void *P, void *C, int idx) {
+    // @todo need 可以通过O(n)的维护来优化
 	void *nei = this -> neighborSetOf(idx);
 	void *neiP = this -> setIntersection(P, nei);
 	int need = this -> sizeOfSet(P) - this -> sizeOfSet(neiP);
@@ -74,6 +75,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 
 int KDefectiveRDS::Solve(int k) {
     ans = 0;
+    st = clock();
 	memset(LB, 0, sizeof(int) * size);
 	getOrder(order);
 	for (int i = size-1; i >= 0; i--) {
@@ -86,5 +88,7 @@ int KDefectiveRDS::Solve(int k) {
 
 		this -> deleteSet(P); this -> deleteSet(C);
 	}
+    ed = clock();
+    fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
     return ans;
 }

@@ -265,7 +265,6 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 }
 
 int KDefectiveBase::Solve(int k) {
-    clock_t st, ed;
     st = clock();
     ans = 0; // init the value of the ans
 	void *P = this -> newSet(), *C = this -> newSet();
@@ -275,6 +274,6 @@ int KDefectiveBase::Solve(int k) {
 	solve(P, C, k, k);
 	this -> deleteSet(P); this -> deleteSet(C);
     ed = clock();
-    printf("time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
+    fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
 	return ans;
 }

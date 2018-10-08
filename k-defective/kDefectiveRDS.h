@@ -5,6 +5,7 @@
 
 class KDefectiveRDS {
 	protected:
+    clock_t st, ed; // 用于计时
 	int size; // 点数
 	vector <int> *from; // 邻接链表
 	vector <int> order;
