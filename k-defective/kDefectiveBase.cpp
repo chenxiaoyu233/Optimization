@@ -6,11 +6,13 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
 		from[i].clear();
 	}
 	dis = new int[n];
+    maxDis = new int[n];
 }
 
 KDefectiveBase::~KDefectiveBase() {
 	delete[] from;
 	delete[] dis;
+    delete[] maxDis;
 }
 
 void KDefectiveBase::AddEdge(int a, int b) {
@@ -91,13 +93,24 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	}
 }
 
-void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
+/*void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	int maxDiam = this -> calcLimOfDiam(P, C, k);
 	for (int i = 0; i < size; i++) if(this -> existsInSet(C, i)) {
 		this -> calcDisFrom(P, C, i);
 		int diam = 0;
 		for (int j = 0; j < size; j++) if(this -> existsInSet(P, j)) diam = max(diam, dis[j]);
 		if ( diam > maxDiam ) this -> removeVertexFromSet(C, i);
+	}
+}*/
+void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
+    int maxDiam = this -> calcLimOfDiam(P, C, k);
+    memset(maxDis, 0, sizeof(int) * size);
+    for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
+		this -> calcDisFrom(P, C, i);
+		for (int j = 0; j < size; j++) if (this -> existsInSet(C, j)) maxDis[j] = max(maxDis[j], dis[j]);
+    }
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
+		if (maxDis[i] > maxDiam) this -> removeVertexFromSet(C, i);
 	}
 }
 
@@ -238,7 +251,6 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
-
 	// reduction
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByDiam(P, C, k);
@@ -248,10 +260,12 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
 	if (sizeOfSet(P) + sizeOfSet(C) <= ans) return;
 	
+    count++; // 统计搜索树的节点大小
+    
 	// update ans
 	if (sizeOfSet(C) == 0) {
 		ans = max(ans, sizeOfSet(P));
-		printf("new ans: %d\n", ans);
+		//printf("new ans: %d\n", ans);
 		return;
 	}
 
@@ -267,6 +281,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 }
 
 int KDefectiveBase::Solve(int k) {
+    count = 0;
     st = clock();
     ans = 0; // init the value of the ans
 	void *P = this -> newSet(), *C = this -> newSet();
@@ -277,5 +292,6 @@ int KDefectiveBase::Solve(int k) {
 	this -> deleteSet(P); this -> deleteSet(C);
     ed = clock();
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
+    fprintf(stderr, "%lu\n", count);
 	return ans;
 }

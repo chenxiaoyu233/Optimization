@@ -47,7 +47,9 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
-
+    
+    count++;
+    
 	// reduction
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		int need = calcNeedEdge(P, C, i);
@@ -57,7 +59,10 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 	// update ans
 	if (this -> sizeOfSet(C) == 0) {
 		int sz = this -> sizeOfSet(P);
-		if (sz > ans) ans = sz;
+        if (sz > ans) {
+            ans = sz;
+            //printf("new ans: %d\n", ans);
+        }
 	}
 
 	// branch
@@ -76,6 +81,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 }
 
 int KDefectiveRDS::Solve(int k) {
+    count = 0;
     ans = 0;
     st = clock();
 	memset(LB, 0, sizeof(int) * size);
@@ -92,5 +98,6 @@ int KDefectiveRDS::Solve(int k) {
 	}
     ed = clock();
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
+    fprintf(stderr, "%lu\n", count);
     return ans;
 }
