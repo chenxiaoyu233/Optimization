@@ -4,8 +4,6 @@
 #include "kDefective.h"
 #include "GraphGenerator.h"
 #include "BaoSolver.h"
-#include "kDefectiveRDS.h"
-#include "kDefectiveRDSBitSet.h"
 using namespace std;
 
 void *solver;
