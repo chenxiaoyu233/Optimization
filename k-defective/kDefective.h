@@ -4,4 +4,7 @@
 #include "kDefectiveBase.h"
 #include "kDefectiveBitSet.h"
 
+// Data Structure
+#include "BitSetImplement.h"
+
 #endif

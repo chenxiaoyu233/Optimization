@@ -48,6 +48,7 @@ class KDefectiveBase {
 	static bool cmpForOrder(const pair<int, int> &a, const pair<int, int> &b);
 	void calcBranchOrder(void *P, void *C, vector<pair<int, int> > &order);
 
+	virtual void branch(void *P, void *C, int k, int m);
 	virtual void branchWhenCouldNotReduceM(void *P, void *C, int k, int m);
 	virtual void branchWhenCouldReduceM(void *P, void *C, int k, int m);
 	virtual bool couldRecudeM(void *P, void *C);

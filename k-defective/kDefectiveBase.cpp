@@ -246,6 +246,14 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	}
 }
 
+void KDefectiveBase::branch(void *P, void *C, int k, int m) {
+	if (couldRecudeM(P, C)) {
+		this -> branchWhenCouldReduceM(P, C, k, m);
+	} else {
+		this -> branchWhenCouldNotReduceM(P, C, k, m);
+	}
+}
+
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
     
@@ -270,11 +278,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	}
 
 	// branch
-	if (couldRecudeM(P, C)) {
-		this -> branchWhenCouldReduceM(P, C, k, m);
-	} else {
-		this -> branchWhenCouldNotReduceM(P, C, k, m);
-	}
+	this -> branch(P, C, k, m);
 
 	// free the menory
 	this -> deleteSet(P); this -> deleteSet(C);
