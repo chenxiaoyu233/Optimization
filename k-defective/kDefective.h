@@ -8,4 +8,9 @@
 // Data Structure
 #include "BitSetImplement.h"
 
+// Profile and Debug
+#include "GraphGenerator.h"
+#include "BaoSolver.h"
+#include "Compare.h"
+
 #endif

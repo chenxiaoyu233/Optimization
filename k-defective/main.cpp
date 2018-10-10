@@ -2,8 +2,6 @@
 #include <cstring>
 #include <cstdio>
 #include "kDefective.h"
-#include "GraphGenerator.h"
-#include "BaoSolver.h"
 using namespace std;
 
 void *solver;
@@ -65,7 +63,10 @@ int main(int argc, char** argv) {
                string(argv[1]) == "Simple"
     ) {
 		solve(string(argv[1]), string(argv[2]), atoi(argv[3]));
-	} else {
+	} else if (string(argv[1]) == "draw") {
+		Compare *compare = new Compare(string(argv[2]));
+		compare -> Run(20, atof(argv[3]));
+	}else {
 		puts("invalid arguments");
 	}
 	return 0;

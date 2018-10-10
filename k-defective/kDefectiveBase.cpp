@@ -15,6 +15,10 @@ KDefectiveBase::~KDefectiveBase() {
     delete[] maxDis;
 }
 
+size_t KDefectiveBase::GetCount() {
+    return count;
+}
+
 void KDefectiveBase::AddEdge(int a, int b) {
 	from[a].push_back(b);
 	from[b].push_back(a);
@@ -273,7 +277,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	// update ans
 	if (sizeOfSet(C) == 0) {
 		ans = max(ans, sizeOfSet(P));
-		//printf("new ans: %d\n", ans);
+		fprintf(stderr, "new ans: %d\n", ans);
 		return;
 	}
 

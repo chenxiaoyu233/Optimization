@@ -31,10 +31,13 @@ class KDefectiveRDS {
 
 	public:
 	KDefectiveRDS(int n);
-	~KDefectiveRDS();
+	virtual ~KDefectiveRDS();
 
 	int Solve(int k);
 	void AddEdge(int a, int b);
+    
+    // API for read the Protected var
+    virtual size_t GetCount();
 };
 
 #endif

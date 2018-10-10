@@ -10,6 +10,10 @@ KDefectiveRDS::~KDefectiveRDS() {
 	delete[] LB;
 }
 
+size_t KDefectiveRDS::GetCount() {
+    return count;
+}
+
 void KDefectiveRDS::AddEdge(int a, int b) {
 	from[a].push_back(b);
 	from[b].push_back(a);
@@ -61,7 +65,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 		int sz = this -> sizeOfSet(P);
         if (sz > ans) {
             ans = sz;
-            //printf("new ans: %d\n", ans);
+            fprintf(stderr, "new ans: %d\n", ans);
         }
 	}
 
