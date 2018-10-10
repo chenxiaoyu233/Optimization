@@ -21,6 +21,7 @@ void solve(string solverT, string filePath, int k) {
 			if (solverT == "algo") solver = new BitSetImplement<bitset<1000>, KDefectiveBase>(n);
 			else if (solverT == "bao") solver = new BaoSolver(n);
             else if (solverT == "RDS") solver = new BitSetImplement<bitset<1000>, KDefectiveRDS>(n);
+            else if (solverT == "Simple") solver = new BitSetImplement<bitset<1000>, KDefectiveSimple>(n);
 		}else if(flag == 'e') { // edge
 			int a, b; fscanf(in, " %d%d", &a, &b);
 			--a; --b; // 从 0 开始编号
@@ -30,6 +31,8 @@ void solve(string solverT, string filePath, int k) {
 				((BaoSolver*) solver) -> AddEdge(a, b);
             } else if(solverT == "RDS") {
                 ((KDefectiveRDS*) solver) -> AddEdge(a, b);
+            } else if(solverT == "Simple") {
+                ((KDefectiveSimple*) solver) -> AddEdge(a, b);
             }
 		}
 	}
@@ -41,6 +44,8 @@ void solve(string solverT, string filePath, int k) {
 		ans = ((BaoSolver*) solver) -> Solve(k);
     else if (solverT == "RDS")
         ans = ((KDefectiveRDS*) solver) -> Solve(k);
+    else if (solverT == "Simple")
+        ans = ((KDefectiveSimple*) solver) -> Solve(k);
 	printf("%d\n", ans);
 }
 
@@ -53,7 +58,12 @@ int main(int argc, char** argv) {
 	}
 	if (string(argv[1]) == "gen") {
 		gen.Generate(atoi(argv[2]), atof(argv[3]), 0.0001);
-	} else if (string(argv[1]) == "algo" || string(argv[1]) == "bao" || string(argv[1]) == "RDS") {
+	} else if (
+               string(argv[1]) == "algo" ||
+               string(argv[1]) == "bao" ||
+               string(argv[1]) == "RDS" ||
+               string(argv[1]) == "Simple"
+    ) {
 		solve(string(argv[1]), string(argv[2]), atoi(argv[3]));
 	} else {
 		puts("invalid arguments");
