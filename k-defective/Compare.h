@@ -11,9 +11,9 @@
 class Compare: public GraphGenerator {
 	protected:
 	// solver pointers
-	BitSetImplement<bitset<1000>, KDefectiveBase> *solverBase;
-	BitSetImplement<bitset<1000>, KDefectiveSimple> *solverSimple;
-	BitSetImplement<bitset<1000>, KDefectiveRDS> *solverRDS;
+	BitSetImplement<bitset<128>, KDefectiveBase> *solverBase;
+	BitSetImplement<bitset<128>, KDefectiveSimple> *solverSimple;
+	BitSetImplement<bitset<128>, KDefectiveRDS> *solverRDS;
 
 	// time result container
 	vector <double> timeBase;

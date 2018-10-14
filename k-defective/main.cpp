@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
 		solve(string(argv[1]), string(argv[2]), atoi(argv[3]));
 	} else if (string(argv[1]) == "draw") {
 		Compare *compare = new Compare(string(argv[2]));
-		compare -> Run(20, atof(argv[3]));
+		compare -> Run(30, atof(argv[3]));
 	}else {
 		puts("invalid arguments");
 	}

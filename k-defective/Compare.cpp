@@ -17,7 +17,7 @@ void Compare::run(int n) {
     vecTime.clear(); vecCnt.clear();\
 	for (int i = 1; i <= 5; i++) {\
 		st = clock();\
-		if (i * n <= n * (n-1) / 2) solver -> Solve(i * n);\
+		if (i * 10 <= n * (n-1) / 2) solver -> Solve(i * 10);\
 		ed = clock();\
 		vecTime.push_back( double(ed - st) / CLOCKS_PER_SEC * 1000);\
         vecCnt.push_back(solver -> GetCount());\
@@ -45,9 +45,9 @@ void Compare::run(int n) {
 }
 
 void Compare::Run(int n, double density) {
-	solverBase = new BitSetImplement<bitset<1000>, KDefectiveBase>(n);
-	solverSimple = new BitSetImplement<bitset<1000>, KDefectiveSimple>(n);
-	solverRDS = new BitSetImplement<bitset<1000>, KDefectiveRDS>(n);
+	solverBase = new BitSetImplement<bitset<128>, KDefectiveBase>(n);
+	solverSimple = new BitSetImplement<bitset<128>, KDefectiveSimple>(n);
+	solverRDS = new BitSetImplement<bitset<128>, KDefectiveRDS>(n);
 
 	this -> Generate(n, density, 0.0001);
 	this -> buildGraphInSolver();

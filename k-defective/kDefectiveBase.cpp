@@ -259,7 +259,7 @@ void KDefectiveBase::branch(void *P, void *C, int k, int m) {
 }
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
-    if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
+    //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -295,7 +295,7 @@ int KDefectiveBase::Solve(int k) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	init(P, C);
 	for (int i = 0; i < 500; i++) prework(P, C, k);
-    printf("new ans: %d\n", ans);
+    fprintf(stderr, "new ans: %d\n", ans);
 	solve(P, C, k, k);
 	this -> deleteSet(P); this -> deleteSet(C);
     ed = clock();

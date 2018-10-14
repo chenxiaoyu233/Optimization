@@ -56,13 +56,13 @@ class KDefectiveBase {
 	virtual void prework(void *P, void *C, int k);
 
 	void init(void *P, void *C);
-	void solve(void *_P, void *_C, int k, int m);
+	virtual void solve(void *_P, void *_C, int k, int m);
 
 	public:
 	KDefectiveBase(int n);
 	virtual ~KDefectiveBase();
 
-	int Solve(int k);
+	virtual int Solve(int k);
 	void AddEdge(int a, int b);
     
     // API for read the Protected var

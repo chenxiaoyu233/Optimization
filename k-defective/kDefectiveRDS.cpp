@@ -1,22 +1,11 @@
 #include "kDefectiveRDS.h"
 
-KDefectiveRDS::KDefectiveRDS(int n):size(n) {
-	from = new vector<int>[n];
+KDefectiveRDS::KDefectiveRDS(int n):KDefectiveBase(n) {
 	LB = new int[n];
 }
 
 KDefectiveRDS::~KDefectiveRDS() {
-	delete[] from;
 	delete[] LB;
-}
-
-size_t KDefectiveRDS::GetCount() {
-    return count;
-}
-
-void KDefectiveRDS::AddEdge(int a, int b) {
-	from[a].push_back(b);
-	from[b].push_back(a);
 }
 
 void KDefectiveRDS::getOrder(vector<int> &vec) {
@@ -37,17 +26,8 @@ int KDefectiveRDS::minInSet(void *C) {
     return -1;
 }
 
-int KDefectiveRDS::calcNeedEdge(void *P, void *C, int idx) {
-    // @todo need 可以通过O(n)的维护来优化
-	void *nei = this -> neighborSetOf(idx);
-	void *neiP = this -> setIntersection(P, nei);
-	int need = this -> sizeOfSet(P) - this -> sizeOfSet(neiP);
-	this -> deleteSet(nei); this -> deleteSet(neiP);
-    return need;
-}
-
 void KDefectiveRDS::solve(void *_P, void *_C, int k) {
-    if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
+    //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
