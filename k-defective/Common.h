@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <list>
 #include <algorithm>
 #include <cmath>
 #include <queue>

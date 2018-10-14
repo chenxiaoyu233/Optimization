@@ -111,11 +111,11 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
     int maxDiam = this -> calcLimOfDiam(P, C, k);
     memset(maxDis, 0, sizeof(int) * size);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
-    vector <int> inC; inC.clear();
+    list <int> inC; inC.clear();
     for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) inC.push_back(i);
     for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 		this -> calcDisFrom(P, C, i);
-        for (vector<int>::iterator it = inC.begin(); it != inC.end(); ) {
+        for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
             maxDis[*it] = max(maxDis[*it], dis[*it]);
             if (maxDis[*it] > maxDiam) {
                 this -> removeVertexFromSet(C, i);
