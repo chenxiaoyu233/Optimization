@@ -7,12 +7,14 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
 	}
 	dis = new int[n];
     maxDis = new int[n];
+    isInPC = new bool[n];
 }
 
 KDefectiveBase::~KDefectiveBase() {
 	delete[] from;
 	delete[] dis;
     delete[] maxDis;
+    delete[] isInPC;
 }
 
 size_t KDefectiveBase::GetCount() {
@@ -86,7 +88,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
         for (auto to: from[tt]) {
 
 			// 保证被删掉的点不会在计算距离时被用到
-			if (!this -> existsInSet(C, to) && !this -> existsInSet(P, to)) continue;
+			if (!isInPC[to]) continue;
 
 			if (dis[to] == 0x3f3f3f3f) {
 				dis[to] = dis[tt] + 1;
@@ -108,13 +110,17 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
     int maxDiam = this -> calcLimOfDiam(P, C, k);
     memset(maxDis, 0, sizeof(int) * size);
+    for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
     for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 		this -> calcDisFrom(P, C, i);
-		for (int j = 0; j < size; j++) if (this -> existsInSet(C, j)) maxDis[j] = max(maxDis[j], dis[j]);
+        for (int j = 0; j < size; j++) if (this -> existsInSet(C, j)) {
+            maxDis[j] = max(maxDis[j], dis[j]);
+            if (maxDis[i] > maxDiam) {
+                this -> removeVertexFromSet(C, i);
+                isInPC[i] = false;
+            }
+        }
     }
-	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
-		if (maxDis[i] > maxDiam) this -> removeVertexFromSet(C, i);
-	}
 }
 
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {

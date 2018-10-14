@@ -11,6 +11,7 @@ class KDefectiveBase {
 	int size; // 图的规模
 	int *dis; // 用于计算距离
     int *maxDis; // 用于统计最长的距离
+    bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
 
 	virtual void __init__(void *P, void *C) = 0; // special initial for subclass
