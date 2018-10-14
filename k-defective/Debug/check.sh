@@ -5,7 +5,7 @@ do
 	./KDefective gen "20" "0.6"
 	K=`expr $RANDOM % 7`
 	echo k: $K
-	./KDefective bao main.in $K > bao.out
+	./KDefective algo main.in $K > bao.out
 	./KDefective RDS main.in $K > algo.out
 
 	echo Bao:
