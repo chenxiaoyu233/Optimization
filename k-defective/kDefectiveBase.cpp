@@ -83,8 +83,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	q.push(s);
 	while (!q.empty()) {
 		int tt = q.front(); q.pop();
-		for (int i = 0; i < from[tt].size(); i++) {
-			int to = from[tt][i];
+        for (auto to: from[tt]) {
 
 			// 保证被删掉的点不会在计算距离时被用到
 			if (!this -> existsInSet(C, to) && !this -> existsInSet(P, to)) continue;
@@ -218,7 +217,7 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	this -> calcBranchOrder(P, C, order);
 
 	// 计算需要边数的前缀和并存在 order[i].second 中
-	for (int i = 0, sum = 0; i < order.size(); i++) {
+	for (int i = 0, sum = 0, order_size = order.size(); i < order_size; i++) {
 		int need = this -> calcNeedEdge(P, C, order[i].first);
 		sum += need; 
 		order[i].second = sum;
@@ -226,13 +225,13 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 	}
 
 	// 将之前的计算还原
-	for (int i = 0; i < order.size(); i++)
+	for (int i = 0, order_size = order.size(); i < order_size; i++)
 		this -> removeVertexFromSet(P, order[i].first);
 
 	order.push_back(make_pair(-1, m + 1)); // 放一个标兵
 	// 进行最后一个分支, 比较特殊, 需要专门写
 	int endPos = -1;
-	for (int i = 0; i < order.size(); i++) {
+	for (int i = 0, order_size = order.size(); i < order_size; i++) {
 		if (order[i].second > m) { endPos = i; break; }
 		this -> addVertexToSet(P, order[i].first);
 		this -> removeVertexFromSet(C, order[i].first);
