@@ -10,6 +10,7 @@ class KDefectiveRDS: public KDefectiveBase {
 	int *LB; // 下界
 
 	void getOrder(vector<int> &vec);
+	virtual int calcNeedEdge(void *P, void *C, int idx);
 	virtual void solve(void *P, void *C, int k);
 	int minInSet(void *C);
 

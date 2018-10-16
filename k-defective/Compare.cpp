@@ -32,7 +32,7 @@ void Compare::run(int n) {
 	FILE *out = fopen("draw.raw", "w");
 #define PrintLoop(result, format) do {\
 	for (int i = 0; i < result.size(); i++) {\
-        fprintf(out, ""format" ", result[i]);\
+        fprintf(out, "" format " ", result[i]);\
 	}\
 	fprintf(out, "\n");\
 }while(0)

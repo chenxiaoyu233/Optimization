@@ -17,6 +17,58 @@ KDefectiveBase::~KDefectiveBase() {
     delete[] isInPC;
 }
 
+KDefectiveBase::State::State(int n):size(n) {
+	neiP = new int[n];
+	neiC = new int[n];
+}
+
+KDefectiveBase::State::~State() {
+	delete[] neiP;
+	delete[] neiC;
+}
+
+KDefectiveBase::State::State(const State &other) {
+	size = other.size;
+	sizeP = other.sizeP;
+	sizeC = other.sizeC;
+	neiP = new int[size];
+	neiC = new int[size];
+	memcpy(neiP, other.neiP, sizeof(int) * size);
+	memcpy(neiC, other.neiC, sizeof(int) * size);
+}
+
+void KDefectiveBase::modifyState(char kind, int idx, int delta) {
+	State &now = state.top();
+	if (kind == 'C') {
+		now.sizeC += delta;
+		for (auto to: from[idx]) now.neiC[to] += delta;
+	}
+	if (kind == 'P') {
+		now.sizeP += delta;
+		for (auto to: from[idx]) now.neiP[to] += delta;
+	}
+}
+
+void KDefectiveBase::pushState() {
+	state.push(state.top());
+}
+
+void KDefectiveBase::popState() {
+	state.pop();
+}
+
+void KDefectiveBase::addVertexToSetSync(void *ptr, int idx, char kind) {
+	if (this -> existsInSet(ptr, idx)) return; // 已经在集合中了, 不需要进行任何操作
+	this -> addVertexToSet(ptr, idx);
+	modifyState(kind, idx, +1);
+}
+
+void KDefectiveBase::removeVertexFromSetSync(void *ptr, int idx, char kind) {
+	if (!this -> existsInSet(ptr, idx)) return; // 已经不在集合中了, 不需要进行任何操作 
+	this -> removeVertexFromSet(ptr, idx);
+	modifyState(kind ,idx, -1);
+}
+
 size_t KDefectiveBase::GetCount() {
     return count;
 }
@@ -29,6 +81,7 @@ void KDefectiveBase::AddEdge(int a, int b) {
 void KDefectiveBase::prework(void *_P, void *_C, int k) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
+	this -> pushState();
 
 	vector <int> vec; vec.clear();
 	for (int i = 0; i < size; i++) vec.push_back(i);
@@ -37,30 +90,40 @@ void KDefectiveBase::prework(void *_P, void *_C, int k) {
 		int need = this -> calcNeedEdge(P, C, i);
 		if (need > k) continue;
 		k -= need;
-		this -> addVertexToSet(P, i);
+		this -> addVertexToSetSync(P, i, 'P');
 	}
 	ans = max(ans, this -> sizeOfSet(P));
 
+	this -> popState();
 	this -> deleteSet(P);
 	this -> deleteSet(C);
 }
 
 void KDefectiveBase::init(void *P, void *C) {
 	this -> __init__(P, C); 
+	while(!state.empty()) state.pop();
+	State s(size);
+	s.sizeP = 0; s.sizeC = size;
+	for (int i = 0; i < size; i++) {
+		s.neiC[i] = from[i].size();
+		s.neiP[i] = 0;
+	}
+	state.push(s);
 }
 
 int KDefectiveBase::calcNeedEdge(void *P, void *C, int idx) {
-	void *nei = this -> neighborSetOf(idx);
+	/*void *nei = this -> neighborSetOf(idx);
 	void *neiInP = this -> setIntersection(P, nei);
 	int need = this -> sizeOfSet(P) - this -> sizeOfSet(neiInP);
 	this -> deleteSet(nei); this -> deleteSet(neiInP);
-	return need;
+	return need;*/
+	return state.top().sizeP - state.top().neiP[idx];
 }
 
 void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		int need = this -> calcNeedEdge(P, C, i);
-		if (need > m) this -> removeVertexFromSet(C, i);
+		if (need > m) this -> removeVertexFromSetSync(C, i, 'C');
 	}
 }
 
@@ -118,7 +181,7 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
         for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
             maxDis[*it] = max(maxDis[*it], dis[*it]);
             if (maxDis[*it] > maxDiam) {
-                this -> removeVertexFromSet(C, i);
+                this -> removeVertexFromSetSync(C, i, 'C');
                 isInPC[*it] = false;
                 it = inC.erase(it);
             } else it++;
@@ -129,17 +192,11 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
 	int szP = this -> sizeOfSet(P), szC = this -> sizeOfSet(C);
 	for (int i = 0; i < size; i++) if(this -> existsInSet(C, i)) {
-		void *nei = this -> neighborSetOf(i);
-		void *neiP = this -> setIntersection(P, nei);
-		void *neiC = this -> setIntersection(C, nei);
-		if (this -> sizeOfSet(neiP) + this -> sizeOfSet(neiC) == szP + szC - 1) { 
+		if (state.top().neiC[i] + state.top().neiP[i] == szP + szC - 1) { 
 			// 减去1, 因为在计算的时候没有包含自己
-			this -> removeVertexFromSet(C, i);
-			this -> addVertexToSet(P, i);
+			this -> removeVertexFromSetSync(C, i, 'C');
+			this -> addVertexToSetSync(P, i, 'P');
 		}
-		this -> deleteSet(nei);
-		this -> deleteSet(neiP);
-		this -> deleteSet(neiC);
 	}
 }
 
@@ -170,22 +227,18 @@ bool KDefectiveBase::couldRecudeM(void *P, void *C) {
 void KDefectiveBase::branchWhenCouldNotReduceM(void *P, void *C, int k, int m) {
 	int whe = -1, maxv = -1;
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
-		void *nei = this -> neighborSetOf(i);
-		void *neiC = this -> setIntersection(C, nei);
-		int sz = this -> sizeOfSet(neiC);
+		int sz = state.top().neiC[i];
 		if (sz > maxv) {
 			maxv = sz; whe = i;
 		}
-		this -> deleteSet(nei);
-		this -> deleteSet(neiC);
 	}
-	this -> removeVertexFromSet(C, whe);
-	this -> addVertexToSet(P, whe);
+	this -> removeVertexFromSetSync(C, whe, 'C');
+	this -> addVertexToSetSync(P, whe, 'P');
 	solve(P, C, k, m);
-	this -> removeVertexFromSet(P, whe);
+	this -> removeVertexFromSetSync(P, whe, 'P');
 	solve(P, C, k, m);
 
-	this -> addVertexToSet(C, whe);
+	this -> addVertexToSetSync(C, whe, 'C');
 }
 
 bool KDefectiveBase::cmpForOrder(const pair<int, int> &a, const pair<int, int> &b) {
@@ -230,20 +283,20 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 		int need = this -> calcNeedEdge(P, C, order[i].first);
 		sum += need; 
 		order[i].second = sum;
-		this -> addVertexToSet(P, order[i].first);
+		this -> addVertexToSetSync(P, order[i].first, 'P');
 	}
 
 	// 将之前的计算还原
 	for (int i = 0, order_size = order.size(); i < order_size; i++)
-		this -> removeVertexFromSet(P, order[i].first);
+		this -> removeVertexFromSetSync(P, order[i].first, 'P');
 
 	order.push_back(make_pair(-1, m + 1)); // 放一个标兵
 	// 进行最后一个分支, 比较特殊, 需要专门写
 	int endPos = -1;
 	for (int i = 0, order_size = order.size(); i < order_size; i++) {
 		if (order[i].second > m) { endPos = i; break; }
-		this -> addVertexToSet(P, order[i].first);
-		this -> removeVertexFromSet(C, order[i].first);
+		this -> addVertexToSetSync(P, order[i].first, 'P');
+		this -> removeVertexFromSetSync(C, order[i].first, 'C');
 	}
 	if (endPos == -1) return;
 	endPos -= 1;
@@ -251,8 +304,8 @@ void KDefectiveBase::branchWhenCouldReduceM(void *P, void *C, int k, int m) {
 
 	//解决其他分支
 	for (int i = endPos; i >= 0; i--) {
-		if (i < endPos) this -> addVertexToSet(C, order[i+1].first);
-		this -> removeVertexFromSet(P, order[i].first);
+		if (i < endPos) this -> addVertexToSetSync(C, order[i+1].first, 'C');
+		this -> removeVertexFromSetSync(P, order[i].first, 'P');
 		if (i > 0) solve(P, C, k, m - order[i-1].second);
 		else solve(P, C, k, m);
 	}
@@ -271,6 +324,8 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
+	this -> pushState();
+
 	// reduction
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByDiam(P, C, k);
@@ -278,21 +333,22 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 
 	// cut brunch
     //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
-	if (sizeOfSet(P) + sizeOfSet(C) <= ans) return;
-	
-    count++; // 统计搜索树的节点大小
-    
-	// update ans
-	if (sizeOfSet(C) == 0) {
-		ans = max(ans, sizeOfSet(P));
-		fprintf(stderr, "new ans: %d\n", ans);
-		return;
-	}
+    if (sizeOfSet(P) + sizeOfSet(C) > ans) {
 
-	// branch
-	this -> branch(P, C, k, m);
+        count++; // 统计搜索树的节点大小
+        
+        // update ans
+        if (sizeOfSet(C) == 0) {
+            ans = max(ans, sizeOfSet(P));
+            fprintf(stderr, "new ans: %d\n", ans);
+        } else {
+            // branch
+            this -> branch(P, C, k, m);
+        }
+    }
 
 	// free the menory
+	this -> popState();
 	this -> deleteSet(P); this -> deleteSet(C);
 }
 

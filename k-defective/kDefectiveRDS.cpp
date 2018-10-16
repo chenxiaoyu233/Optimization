@@ -8,6 +8,14 @@ KDefectiveRDS::~KDefectiveRDS() {
 	delete[] LB;
 }
 
+int KDefectiveRDS::calcNeedEdge(void *P, void *C, int idx) {
+	void *nei = this -> neighborSetOf(idx);
+	void *neiInP = this -> setIntersection(P, nei);
+	int need = this -> sizeOfSet(P) - this -> sizeOfSet(neiInP);
+	this -> deleteSet(nei); this -> deleteSet(neiInP);
+	return need;
+}
+
 void KDefectiveRDS::getOrder(vector<int> &vec) {
 	// sort
 	vector <pair<int, int> > order_pair; order_pair.clear();

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <vector>
 #include <list>
+#include <stack>
 #include <algorithm>
 #include <cmath>
 #include <queue>

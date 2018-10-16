@@ -14,6 +14,28 @@ class KDefectiveBase {
     bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
 
+	//中间状态, 不方便存在递归栈中
+	class State {
+		public:
+		int size;
+		int *neiP, *neiC;
+		int sizeP, sizeC;
+		
+		State(int n);
+		State(const State &other); // 复制构造函数
+		~State();
+
+	};
+	stack <State> state;
+	// 将 idx 添加/删除到集合 kind 中
+	void modifyState(char kind, int idx, int delta);
+	void pushState();
+	void popState();
+
+	// 将点添加/删除到集合, 并将信息同步到state
+	void addVertexToSetSync(void *ptr, int idx, char kind);
+	void removeVertexFromSetSync(void *ptr, int idx, char kind);
+
 	virtual void __init__(void *P, void *C) = 0; // special initial for subclass
 
 	// virtual API for set Operation
