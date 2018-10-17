@@ -140,7 +140,7 @@ int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
 	return sz - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
 }
 
-void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+/*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	memset(dis, 0x3f, sizeof(int) * size); // 初始化
 	queue <int> q; 
 	while (!q.empty()) q.pop();
@@ -159,6 +159,24 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 			}
 		}
 	}
+}*/
+
+void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+	memset(dis, 0x3f, sizeof(int) * size);
+	int *q = new int[size], l = -1, r = -1;
+	dis[s] = 0;
+	q[++r] = s;
+	while(l != r) {
+		int tt = q[++l];
+		for (auto to: from[tt]) {
+			if (!isInPC[to]) continue;
+			if (dis[to] == 0x3f3f3f3f) {
+				dis[to] = dis[tt] + 1;
+				q[++r] = to;
+			}
+		}
+	}
+	delete[] q;
 }
 
 /*void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
