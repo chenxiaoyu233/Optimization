@@ -278,19 +278,20 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 
 	// cut brunch
     //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
-	if (sizeOfSet(P) + sizeOfSet(C) <= ans) return;
+	if (sizeOfSet(P) + sizeOfSet(C) > ans) {
 	
-    count++; // 统计搜索树的节点大小
-    
-	// update ans
-	if (sizeOfSet(C) == 0) {
-		ans = max(ans, sizeOfSet(P));
-		fprintf(stderr, "new ans: %d\n", ans);
-		return;
-	}
+		count++; // 统计搜索树的节点大小
+		
+		// update ans
+		if (sizeOfSet(C) == 0) {
+			ans = max(ans, sizeOfSet(P));
+			fprintf(stderr, "new ans: %d\n", ans);
+		} else {
 
-	// branch
-	this -> branch(P, C, k, m);
+			// branch
+			this -> branch(P, C, k, m);
+		}
+	}
 
 	// free the menory
 	this -> deleteSet(P); this -> deleteSet(C);
