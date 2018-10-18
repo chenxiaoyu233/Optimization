@@ -6,7 +6,9 @@
 #include "kDefectiveRDS.h"    // 用于对比的 RDS 算法的实现
 
 // Data Structure
+#include "MyBitSet.h"
 #include "BitSetImplement.h"
+#include "MyBitSetImplement.h"
 
 // Profile and Debug
 #include "GraphGenerator.h"

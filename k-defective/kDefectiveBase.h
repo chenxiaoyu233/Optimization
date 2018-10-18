@@ -14,6 +14,8 @@ class KDefectiveBase {
     bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
 
+	void **neiSet; // 邻居集合 (待实现)
+
 	//中间状态, 不方便存在递归栈中
 	class State {
 		public:
@@ -42,12 +44,14 @@ class KDefectiveBase {
 	virtual void addVertexToSet(void *ptr, int idx) = 0;
 	virtual void removeVertexFromSet(void *ptr, int idx) = 0;
 	virtual void* setIntersection(void *A, void *B) = 0;
+	virtual void* setUnion(void *A, void *B) = 0;
 	virtual void* neighborSetOf(int idx) = 0;
 	virtual bool existsInSet(void *ptr, int idx) = 0;
 	virtual int sizeOfSet(void *ptr) = 0;
 	virtual void deleteSet(void *ptr) = 0;
 	virtual void* newSet() = 0;
 	virtual void setCopyTo(void *src, void *dst) = 0;
+	virtual size_t nextBitPos(void *ptr) = 0;
 
 	// reduction using edge number
 	virtual void reductionByEdge(void *P, void *C, int m); 

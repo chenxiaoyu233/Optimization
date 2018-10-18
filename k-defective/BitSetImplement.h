@@ -12,16 +12,22 @@ class BitSetImplement: public Base {
 	virtual void addVertexToSet(void *ptr, int idx);
 	virtual void removeVertexFromSet(void *ptr, int idx);
 	virtual void* setIntersection(void *A, void *B);
+	virtual void* setUnion(void *A, void *B);
 	virtual void* neighborSetOf(int idx);
 	virtual bool existsInSet(void *ptr, int idx);
 	virtual int sizeOfSet(void *ptr);
 	virtual void deleteSet(void *ptr);
 	virtual void* newSet();
 	virtual void setCopyTo(void *src, void *dst);
+	virtual size_t nextBitPos(void *ptr);
 	virtual void __init__(void *P, void *C);
 	public:
 	BitSetImplement(int n);
 };
+
+// 这个函数在这个类型中没有实际用处, 在子类中具体实现
+template <class Bitset, class Base>
+size_t BitSetImplement<Bitset, Base>::nextBitPos(void *ptr) { return 0; }
 
 template <class Bitset, class Base>
 BitSetImplement<Bitset, Base>::BitSetImplement(int n) : Base(n) { }
@@ -49,6 +55,13 @@ template <class Bitset, class Base>
 void* BitSetImplement<Bitset, Base>::setIntersection(void *A, void *B) {
 	Bitset *__A__ = (Bitset*) A, *__B__ = (Bitset*) B, *__C__ = new Bitset();
 	*__C__ = (*__A__) & (*__B__);
+	return __C__;
+}
+
+template <class Bitset, class Base>
+void* BitSetImplement<Bitset, Base>::setUnion(void *A, void *B) {
+	Bitset *__A__ = (Bitset*) A, *__B__ = (Bitset*) B, *__C__ = new Bitset();
+	*__C__ = (*__A__) | (*__B__);
 	return __C__;
 }
 

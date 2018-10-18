@@ -8,6 +8,7 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
 	dis = new int[n];
     maxDis = new int[n];
     isInPC = new bool[n];
+	neiSet = new void*[n];
 }
 
 KDefectiveBase::~KDefectiveBase() {
@@ -15,6 +16,7 @@ KDefectiveBase::~KDefectiveBase() {
 	delete[] dis;
     delete[] maxDis;
     delete[] isInPC;
+	delete[] neiSet;
 }
 
 KDefectiveBase::State::State(int n):size(n) {
@@ -101,6 +103,12 @@ void KDefectiveBase::prework(void *_P, void *_C, int k) {
 
 void KDefectiveBase::init(void *P, void *C) {
 	this -> __init__(P, C); 
+
+	// 初始化邻居集合
+	for (int i = 0; i < size; i++) 
+		neiSet[i] = this -> neighborSetOf(i);
+
+	// 初始化栈
 	while(!state.empty()) state.pop();
 	State s(size);
 	s.sizeP = 0; s.sizeC = size;
@@ -169,7 +177,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	q[++r] = s;
 	while(l != r) {
 		int tt = q[++l];
-		for (auto to: from[tt]) {
+		for (auto to: from[tt]){
 			if (!isInPC[to]) continue;
 			if (dis[to] == 0x3f3f3f3f) {
 				dis[to] = dis[tt] + 1;
@@ -179,6 +187,29 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	}
 	delete[] q;
 }
+
+// 使用位运算优化了最短路, (目前是负优化)
+/*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+	void *PC = this -> setUnion(P, C);
+	memset(dis, 0x3f, sizeof(int) * size);
+	int *q = new int[size], l = -1, r = -1;
+	dis[s] = 0;
+	q[++r] = s;
+	while(l != r) {
+		int tt = q[++l];
+		void *Nei = this -> setIntersection(neiSet[tt], PC);
+		for (int to = this -> nextBitPos(Nei); to != -1; to = this -> nextBitPos(Nei)) {
+			if (dis[to] == 0x3f3f3f3f) {
+				dis[to] = dis[tt] + 1;
+				q[++r] = to;
+				this -> removeVertexFromSet(PC, to);
+			}
+		}
+		this -> deleteSet(Nei);
+	}
+	this -> deleteSet(PC);
+	delete[] q;
+}*/
 
 /*void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	int maxDiam = this -> calcLimOfDiam(P, C, k);
@@ -191,21 +222,27 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 }*/
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
     int maxDiam = this -> calcLimOfDiam(P, C, k);
-    memset(maxDis, 0, sizeof(int) * size);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
     list <int> inC; inC.clear();
     for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) inC.push_back(i);
-    for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
-		this -> calcDisFrom(P, C, i);
-        for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
-            maxDis[*it] = max(maxDis[*it], dis[*it]);
-            if (maxDis[*it] > maxDiam) {
-                this -> removeVertexFromSetSync(C, i, 'C');
-                isInPC[*it] = false;
-                it = inC.erase(it);
-            } else it++;
-        }
-    }
+	bool flag = true;
+	//int cnt = 0;
+	while(flag) {
+		flag = false;
+		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
+			this -> calcDisFrom(P, C, i);
+			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
+				if (dis[*it] > maxDiam) {
+					this -> removeVertexFromSetSync(C, i, 'C');
+					isInPC[*it] = false;
+					it = inC.erase(it);
+					//cnt++;
+					flag = true;
+				} else it++;
+			}
+		}
+	}
+	//fprintf(stderr, "reduceByDiam: %d\n", cnt);
 }
 
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
@@ -375,12 +412,19 @@ int KDefectiveBase::Solve(int k) {
     count = 0;
     st = clock();
     ans = 0; // init the value of the ans
+
+	// 申请空间
 	void *P = this -> newSet(), *C = this -> newSet();
+
 	init(P, C);
 	for (int i = 0; i < 500; i++) prework(P, C, k);
     fprintf(stderr, "new ans: %d\n", ans);
 	solve(P, C, k, k);
+
+	// 释放空间
 	this -> deleteSet(P); this -> deleteSet(C);
+	for (int i = 0; i < size; i++) this -> deleteSet(neiSet[i]); //init() 中初始化
+
     ed = clock();
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
     fprintf(stderr, "%lu\n", count);
