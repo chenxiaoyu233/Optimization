@@ -170,7 +170,7 @@ int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
 }*/
 
 // 和原来的版本相比, 带来了3倍的速度提升
-void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+/*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	memset(dis, 0x3f, sizeof(int) * size);
 	int *q = new int[size], l = -1, r = -1;
 	dis[s] = 0;
@@ -186,10 +186,10 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 		}
 	}
 	delete[] q;
-}
+}*/
 
 // 使用位运算优化了最短路, (目前是负优化)
-/*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	void *PC = this -> setUnion(P, C);
 	memset(dis, 0x3f, sizeof(int) * size);
 	int *q = new int[size], l = -1, r = -1;
@@ -209,7 +209,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	}
 	this -> deleteSet(PC);
 	delete[] q;
-}*/
+}
 
 /*void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	int maxDiam = this -> calcLimOfDiam(P, C, k);
@@ -384,7 +384,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 
 	// reduction
 	this -> reductionByEdge(P, C, m);
-	this -> reductionByDiam(P, C, k);
+	//this -> reductionByDiam(P, C, k);
 	this -> reductionByConnectToAll(P, C);
 
 	// cut brunch

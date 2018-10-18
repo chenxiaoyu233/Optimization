@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 project (KDefective)
 
 # 指定编译器
-SET(CMAKE_CXX_COMPILER "g++-7")
+SET(CMAKE_CXX_COMPILER "g++")
 
 # 调试开关
 option (NDEBUG "disable the debug" OFF)
