@@ -117,7 +117,7 @@ template <size_t BitNum>
 size_t MyBitSet<BitNum>::nextBitPos() {
 	size_t ans = -1;
 	for (int i = 0; i < WordNum; i++) if (field[i] != 0) {
-		ans = __builtin_ctz(field[i]);
+		ans = __builtin_ctzll(field[i]);
 		field[i] &= ~(1ul << ans);
 		ans += i * WordLen;
 		break;
