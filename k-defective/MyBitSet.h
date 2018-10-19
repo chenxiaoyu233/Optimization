@@ -11,6 +11,7 @@ class MyBitSet {
 	static bool initFlag;
 	static size_t pos[1000];
 	uint64_t *field;
+	const static uint64_t mod_mask = 63;
 	void mallocMemory();
 	void deleteMemory();
 
@@ -44,7 +45,7 @@ void MyBitSet<BitNum>::mallocMemory() {
 		}
 		initFlag = true;
 	}
-	WordNum = BitNum / sizeof(uint64_t) + (BitNum % sizeof(uint64_t) > 0);
+	WordNum = (BitNum >> 6) + ((BitNum & mod_mask) > 0);
 	field = new uint64_t[WordNum];
     memset(field, 0, WordLen * WordNum);
 }
@@ -91,7 +92,7 @@ MyBitSet<BitNum> MyBitSet<BitNum>::operator & (const MyBitSet<BitNum> &other) {
 
 template <size_t BitNum>
 bool MyBitSet<BitNum>::operator[] (size_t idx) {
-	return (field[idx / WordLen] >> (idx % WordLen)) & 1;
+	return (field[idx >> 6] >> (idx & mod_mask)) & 1;
 }
 
 template <size_t BitNum>
@@ -101,9 +102,7 @@ void MyBitSet<BitNum>::reset() {
 
 template <size_t BitNum>
 void MyBitSet<BitNum>::reset(size_t idx) {
-	if ((field[idx / WordLen] >> (idx % WordLen)) & 1) {
-		field[idx / WordLen] &= ~(1ul << (idx % WordLen));
-	}
+	field[idx >> 6] &= ~(1ul << (idx & mod_mask));
 }
 
 template <size_t BitNum>
@@ -113,9 +112,7 @@ void MyBitSet<BitNum>::set() {
 
 template <size_t BitNum>
 void MyBitSet<BitNum>::set(size_t idx) {
-	if (!((field[idx /WordLen] >> (idx % WordLen)) & 1)) {
-		field[idx / WordLen] |= (1ul << (idx % WordLen));
-	}
+	field[idx >> 6] |= (1ul << (idx & mod_mask));
 }
 
 template <size_t BitNum>

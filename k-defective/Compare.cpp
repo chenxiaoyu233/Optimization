@@ -17,7 +17,7 @@ void Compare::run(int n) {
     vecTime.clear(); vecCnt.clear();\
 	for (int i = 1; i <= 5; i++) {\
 		st = clock();\
-		if (i * 10 <= n * (n-1) / 2) solver -> Solve(i * 10);\
+		if (i * n <= n * (n-1) / 2) solver -> Solve(i * n);\
 		ed = clock();\
 		vecTime.push_back( double(ed - st) / CLOCKS_PER_SEC * 1000);\
         vecCnt.push_back(solver -> GetCount());\

@@ -16,10 +16,10 @@ void solve(string solverT, string filePath, int k) {
 		}else if(flag == 'p') { //  info
 			int n, m;
 			fscanf(in, " %*s%d%d", &n, &m);
-			if (solverT == "algo") solver = new MyBitSetImplement<MyBitSet<128>, KDefectiveBase>(n);
+			if (solverT == "algo") solver = new MyBitSetImplement<MyBitSet<1000>, KDefectiveBase>(n);
 			else if (solverT == "bao") solver = new BaoSolver(n);
-            else if (solverT == "RDS") solver = new BitSetImplement<bitset<128>, KDefectiveRDS>(n);
-            else if (solverT == "Simple") solver = new MyBitSetImplement<MyBitSet<128>, KDefectiveBase>(n);
+            else if (solverT == "RDS") solver = new BitSetImplement<bitset<1000>, KDefectiveRDS>(n);
+            else if (solverT == "Simple") solver = new MyBitSetImplement<MyBitSet<1000>, KDefectiveBase>(n);
 		}else if(flag == 'e') { // edge
 			int a, b; fscanf(in, " %d%d", &a, &b);
 			--a; --b; // 从 0 开始编号
