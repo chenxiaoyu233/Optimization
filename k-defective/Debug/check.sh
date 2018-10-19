@@ -2,11 +2,11 @@
 
 for ((i = 1; i; i = i + 1))
 do
-	./KDefective gen "20" "0.6"
-	K=`expr $RANDOM % 7`
+	./KDefective gen "20" "0.1"
+	K=`expr $RANDOM % 60`
 	echo k: $K
-	./KDefective algo main.in $K > bao.out
-	./KDefective RDS main.in $K > algo.out
+	./KDefective RDS main.in $K > bao.out
+	./KDefective algo main.in $K > algo.out
 
 	echo Bao:
 	cat bao.out

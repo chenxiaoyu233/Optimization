@@ -9,6 +9,7 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
     maxDis = new int[n];
     isInPC = new bool[n];
 	neiSet = new void*[n];
+	timeLimit = -1;
 }
 
 KDefectiveBase::~KDefectiveBase() {
@@ -18,6 +19,13 @@ KDefectiveBase::~KDefectiveBase() {
     delete[] isInPC;
 	delete[] neiSet;
 }
+
+void KDefectiveBase::exitWhenTimeIsUp() {
+	if (timeLimit < 0) return; // 没有设置时间上限
+	if (double(clock() - st)/CLOCKS_PER_SEC * 1000 > timeLimit) exit(0);
+}
+
+void KDefectiveBase::setTimeLimit(int ti) { timeLimit = ti; }
 
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
@@ -80,6 +88,7 @@ void KDefectiveBase::AddEdge(int a, int b) {
 	from[b].push_back(a);
 }
 
+// 目前使用这个函数可能会导致得到的答案是不联通的
 void KDefectiveBase::prework(void *_P, void *_C, int k) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -136,16 +145,16 @@ void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 }
 
 int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
-	int sz = this -> sizeOfSet(P) + this -> sizeOfSet(C);
+	int sz = ans;
 	if (k < sz - 1) return 2;
 
 	// 根据保证连通这个前提计算出的直径大小 -> 待验算
 	float delta = 4 * sz * sz - 12 * sz + 17 - 8 * k;
-	if (delta >= 0) {
-		return ((2 * (float)sz + 1) - sqrt(delta))/(float)2;
+	if (delta >= 0 && 2 * sz >= 3){
+			return ((2 * (float)sz + 1) - sqrt(delta))/(float)2;
 	}
 
-	return sz - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
+	return sizeOfSet(P) + sizeOfSet(C) - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
 }
 
 /*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
@@ -221,9 +230,8 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	}
 }*/
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
-	int before = this -> sizeOfSet(C);
-    int maxDiam = this -> calcLimOfDiam(P, C, k);
-	//fprintf(stderr, "maxDiam: %d\n", maxDiam);
+    int maxDiam = this -> calcLimOfDiam(P, C, k) + 1;
+	//fprintf(stderr, "sz: %d, maxDiam: %d, k: %d\n", ans, maxDiam, k);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
     list <int> inC; inC.clear();
     for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) inC.push_back(i);
@@ -232,23 +240,16 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 		flag = false;
 		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 			this -> calcDisFrom(P, C, i);
-			for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
-				//fprintf(stderr, "dis %d: %d; ", i, dis[i]);
-			} 
-			//fprintf(stderr, "\n");
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
 				if (dis[*it] > maxDiam) {
-					//fprintf(stderr, "which: %d, dis: %d\n", *it, dis[*it]);
 					this -> removeVertexFromSetSync(C, *it, 'C');
-					//isInPC[*it] = false;
+					isInPC[*it] = false;
 					it = inC.erase(it);
 					flag = true;
 				} else it++;
 			}
 		}
 	}
-	int after = this -> sizeOfSet(C);
-	//fprintf(stderr, "before: %d, after %d\n", before, after);
 }
 
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
@@ -258,6 +259,14 @@ void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
 			// 减去1, 因为在计算的时候没有包含自己
 			this -> removeVertexFromSetSync(C, i, 'C');
 			this -> addVertexToSetSync(P, i, 'P');
+		}
+	}
+}
+
+void KDefectiveBase::reductionWhenIsolated(void *P, void *C) {
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
+		if (state.top().neiC[i] + state.top().neiP[i] == 0) {
+			this -> removeVertexFromSetSync(C, i, 'C');
 		}
 	}
 }
@@ -383,6 +392,7 @@ void KDefectiveBase::branch(void *P, void *C, int k, int m) {
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
+	this -> exitWhenTimeIsUp();
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -391,6 +401,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	// reduction
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByConnectToAll(P, C);
+	this -> reductionWhenIsolated(P, C);
 	this -> reductionByDiam(P, C, k);
 
 	// cut brunch
@@ -423,7 +434,7 @@ int KDefectiveBase::Solve(int k) {
 	void *P = this -> newSet(), *C = this -> newSet();
 
 	init(P, C);
-	//for (int i = 0; i < 500; i++) prework(P, C, k);
+	//for (int i = 0; i < 500; i++) prework(P, C, k); // 现在使用这个, 可能会导致不联通, 暂时停用
     fprintf(stderr, "new ans: %d\n", ans);
 	solve(P, C, k, k);
 

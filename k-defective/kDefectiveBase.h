@@ -11,6 +11,7 @@ class KDefectiveBase {
 	int size; // 图的规模
 	int *dis; // 用于计算距离
     int *maxDis; // 用于统计最长的距离
+	int timeLimit; // 用于使程序在指定的时间内退出
     bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
 
@@ -53,11 +54,18 @@ class KDefectiveBase {
 	virtual void setCopyTo(void *src, void *dst) = 0;
 	virtual size_t nextBitPos(void *ptr) = 0;
 
+	// 设置时间上限
+	virtual void exitWhenTimeIsUp();
+	virtual void setTimeLimit(int ti); // 单位: 毫秒 
+
 	// reduction using edge number
 	virtual void reductionByEdge(void *P, void *C, int m); 
 
 	// calc the upper bound of the diameter
 	virtual int calcLimOfDiam(void *P, void *C, int k); 
+
+	// reduction when a vertex is connecting to nothing
+	virtual void reductionWhenIsolated(void *P, void *C);
 
 	// reduction using diameter
 	virtual void reductionByDiam(void *P, void *C, int k); 

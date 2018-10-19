@@ -28,6 +28,7 @@ int KDefectiveRDS::minInSet(void *C) {
 
 void KDefectiveRDS::solve(void *_P, void *_C, int k) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
+	this -> exitWhenTimeIsUp();
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -59,7 +60,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 		int need = calcNeedEdge(P, C, order[idx]);
 		this -> addVertexToSetSync(P, order[idx], 'P');
 		solve(P, C, k - need);
-        this -> removeVertexFromSetSync(P, order[idx], 'P');
+		this -> removeVertexFromSetSync(P, order[idx], 'P');
 	}
 
 	this -> popState();
