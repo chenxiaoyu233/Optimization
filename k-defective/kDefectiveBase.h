@@ -98,7 +98,7 @@ class KDefectiveBase {
 	virtual ~KDefectiveBase();
 
 	virtual int Solve(int k);
-	void AddEdge(int a, int b);
+	virtual void AddEdge(int a, int b);
     
     // API for read the Protected var
     virtual size_t GetCount();

@@ -20,18 +20,21 @@ void solve(string solverT, string filePath, int k) {
 			else if (solverT == "bao") solver = new BaoSolver(n);
             else if (solverT == "RDS") solver = new BitSetImplement<bitset<1000>, KDefectiveRDS>(n);
             else if (solverT == "Simple") solver = new MyBitSetImplement<MyBitSet<1000>, KDefectiveBase>(n);
+			else if (solverT == "Prework") solver = new STLSetImplement<set<int>, PreWorker>(n);
 		}else if(flag == 'e') { // edge
 			int a, b; fscanf(in, " %d%d", &a, &b);
 			--a; --b; // 从 0 开始编号
 			if (solverT == "algo") {
 				((KDefectiveBase*) solver) -> AddEdge(a, b);
-			} else if(solverT == "bao") {
+			} else if (solverT == "bao") {
 				((BaoSolver*) solver) -> AddEdge(a, b);
-            } else if(solverT == "RDS") {
+            } else if (solverT == "RDS") {
                 ((KDefectiveRDS*) solver) -> AddEdge(a, b);
-            } else if(solverT == "Simple") {
+            } else if (solverT == "Simple") {
                 ((KDefectiveSimple*) solver) -> AddEdge(a, b);
-            }
+            } else if (solverT == "Prework") {
+				((PreWorker*) solver) -> AddEdge(a, b);
+			}
 		}
 	}
     fclose(in);
@@ -44,6 +47,8 @@ void solve(string solverT, string filePath, int k) {
         ans = ((KDefectiveRDS*) solver) -> Solve(k);
     else if (solverT == "Simple")
         ans = ((KDefectiveSimple*) solver) -> Solve(k);
+    else if (solverT == "Prework")
+		((PreWorker*) solver) -> Process(k);
 	printf("%d\n", ans);
 }
 
@@ -60,13 +65,14 @@ int main(int argc, char** argv) {
                string(argv[1]) == "algo" ||
                string(argv[1]) == "bao" ||
                string(argv[1]) == "RDS" ||
-               string(argv[1]) == "Simple"
+               string(argv[1]) == "Simple" ||
+			   string(argv[1]) == "Prework"
     ) {
 		solve(string(argv[1]), string(argv[2]), atoi(argv[3]));
 	} else if (string(argv[1]) == "draw") {
 		Compare *compare = new Compare(string(argv[2]));
 		compare -> Run(30, atof(argv[3]));
-	}else {
+	} else {
 		puts("invalid arguments");
 	}
 	return 0;
