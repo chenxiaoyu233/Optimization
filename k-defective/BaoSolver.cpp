@@ -49,3 +49,9 @@ BaoSolver::BaoSolver(int n):n(n) {
 void BaoSolver::AddEdge(int a, int b) {
 	edge[a][b] = edge[b][a] = 1;
 }
+
+void BaoSolver::AddEdgeByVector(const vector<pair<int, int> > &edges) {
+	for (auto e: edges) {
+		edge[e.first][e.second] = edge[e.second][e.first] = 1;
+	}
+}

@@ -25,7 +25,7 @@ void KDefectiveBase::exitWhenTimeIsUp() {
 	if (double(clock() - st)/CLOCKS_PER_SEC * 1000 > timeLimit) exit(0);
 }
 
-void KDefectiveBase::setTimeLimit(int ti) { timeLimit = ti; }
+void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
 
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
@@ -86,6 +86,14 @@ size_t KDefectiveBase::GetCount() {
 void KDefectiveBase::AddEdge(int a, int b) {
 	from[a].push_back(b);
 	from[b].push_back(a);
+}
+
+void KDefectiveBase::AddEdgeByVector(const vector<pair<int, int> > &edges) {
+	for (int i = 0; i < size; i++) from[i].clear();
+	for (auto e: edges) {
+		from[e.first].push_back(e.second);
+		from[e.second].push_back(e.first);
+	}
 }
 
 // 目前使用这个函数可能会导致得到的答案是不联通的

@@ -56,7 +56,6 @@ class KDefectiveBase {
 
 	// 设置时间上限
 	virtual void exitWhenTimeIsUp();
-	virtual void setTimeLimit(int ti); // 单位: 毫秒 
 
 	// reduction using edge number
 	virtual void reductionByEdge(void *P, void *C, int m); 
@@ -99,6 +98,8 @@ class KDefectiveBase {
 
 	virtual int Solve(int k);
 	virtual void AddEdge(int a, int b);
+	virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
+	virtual void SetTimeLimit(int ti); // 单位: 毫秒 
     
     // API for read the Protected var
     virtual size_t GetCount();

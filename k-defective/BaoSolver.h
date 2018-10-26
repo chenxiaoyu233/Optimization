@@ -15,6 +15,7 @@ class BaoSolver {
 	BaoSolver(int n);
 	int Solve(int k);
 	void AddEdge(int a, int b);
+	void AddEdgeByVector(const vector<pair<int, int> > &edges);
 };
 
 #endif
