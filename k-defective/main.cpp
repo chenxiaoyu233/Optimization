@@ -36,7 +36,7 @@ struct globalArgs_t {
 	bool needHelp;        // -h 表示需要帮助
 } globalArgs;
 
-static const char *optString = "f:r:w:O:Pt:a:D:n:d:hk:";
+static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:";
 
 void InitGlobalArgs() {
 	globalArgs.readFileName = "";
@@ -143,22 +143,35 @@ void ReadGraph() {
 
 void SolveWork() {
 	if (!HaveEnoughArgs("rptaDk")) return;
-	KDefectiveBase *solver = NULL, *preworker = NULL;
+	KDefectiveBase *solver = NULL;
+   	PreWorker* preworker = NULL;
 	int ans = -1;
 
+	// 从文件输入图
 	ReadGraph();
-	if (globalArgs.needPrework) {
-		// 暂时没有实现
-	}
 
-	// 暴力输出解
-	if (globalArgs.algoType == "Bao") { // 仅用于调试
+	// 暴力输出解(用于Debug其他的实现, 当然也包括预处理器)
+	if (globalArgs.algoType == "Bao") { 
 		BaoSolver* baoSolver;
 		baoSolver = new BaoSolver(N);
 		baoSolver -> AddEdgeByVector(edges);
 		ans = baoSolver -> Solve(globalArgs.k);
 		printf("ans: %d\n", ans);
 		return;
+	}
+
+	// 预处理图
+	if (globalArgs.needPrework) {
+		preworker = new STLSetImplement<set<int>, PreWorker>(N);
+		preworker -> AddEdgeByVector(edges);
+		auto ret = preworker -> Process(globalArgs.k);
+
+		// 更新点集和边集
+		edges = ret.first;
+		N = ret.second;
+		
+        // 回收内存
+		delete preworker;
 	}
 
 	// 创建求解器
@@ -187,6 +200,9 @@ void SolveWork() {
 	// 求解
 	ans = solver -> Solve(globalArgs.k);
 	printf("ans: %d\n", ans);
+
+	// 回收内存
+	delete solver;
 }
 
 void GenerateWork() {

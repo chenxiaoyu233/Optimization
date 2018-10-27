@@ -20,12 +20,18 @@ class PreWorker: public KDefectiveBase {
     void mallocMem();
     void freeMem();
 
+	// 将预处理完之后的边集合返回
+	vector<pair<int, int> > getEdges();
+
+	// 将预处理完之后的点的数量返回
+	int getVertexNum();
+
 	public:
 	PreWorker(int n);
 	~PreWorker();
 
-	virtual void AddEdge(int a, int b);
-	void Process(int k);
+	virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
+	pair<vector<pair<int, int> >, int> Process(int k);
 	void deleteIllegalVertex(int k);
 };
 
