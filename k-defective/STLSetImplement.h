@@ -96,7 +96,7 @@ void* STLSetImplement<Set, Base>::newSet() {
 template <class Set, class Base>
 void STLSetImplement<Set, Base>::setCopyTo(void *src, void *dst) {
 	Set *__src__ = (Set*) src, *__dst__ = (Set*) dst;
-	(*__src__) = (*__dst__);
+	(*__dst__) = (*__src__);
 }
 
 template <class Set, class Base>
