@@ -28,7 +28,7 @@ int KDefectiveRDS::minInSet(void *C) {
 
 void KDefectiveRDS::solve(void *_P, void *_C, int k) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
-	this -> exitWhenTimeIsUp();
+	if (this -> timeIsUp()) return;
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -70,6 +70,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 int KDefectiveRDS::Solve(int k) {
     count = 0;
     ans = 0;
+	notFinish = false;
     st = clock();
 	memset(LB, 0, sizeof(int) * size);
 	getOrder(order);

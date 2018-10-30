@@ -198,8 +198,13 @@ void SolveWork() {
 	solver -> AddEdgeByVector(edges);
 
 	// 求解
-	ans = solver -> Solve(globalArgs.k);
-	printf("ans: %d\n", ans);
+	solver -> Solve(globalArgs.k);
+
+	// 输出答案
+	printf("ans: %d\n", solver -> GetAns());
+	printf("size of search tree: %lu\n", solver -> GetCount());
+	printf("cost of time: %lfs\n", solver -> GetCostTime());
+	printf("time out flag: %d\n", solver -> GetNotFinishFlag());
 
 	// 回收内存
 	delete solver;

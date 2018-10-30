@@ -15,6 +15,10 @@ class KDefectiveBase {
     bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
 
+	// 用于记录是否是因为时间上限到了而结束的 
+	// 如果为真表示是超时结束的
+	bool notFinish; 
+
 	void **neiSet; // 邻居集合 (待实现)
 
 	//中间状态, 不方便存在递归栈中
@@ -55,7 +59,7 @@ class KDefectiveBase {
 	virtual size_t nextBitPos(void *ptr) = 0;
 
 	// 设置时间上限
-	virtual void exitWhenTimeIsUp();
+	virtual bool timeIsUp();
 
 	// reduction using edge number
 	virtual void reductionByEdge(void *P, void *C, int m); 
@@ -102,7 +106,15 @@ class KDefectiveBase {
 	virtual void SetTimeLimit(int ti); // 单位: 毫秒 
     
     // API for read the Protected var
+	// 搜索树大小
     virtual size_t GetCount();
+	// 是否超时
+	virtual bool GetNotFinishFlag();
+	// 当前得到的答案
+	virtual int GetAns();
+	// 花费的实际时间
+	virtual double GetCostTime();
+
 };
 
 #endif

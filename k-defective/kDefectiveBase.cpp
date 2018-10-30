@@ -20,9 +20,13 @@ KDefectiveBase::~KDefectiveBase() {
 	delete[] neiSet;
 }
 
-void KDefectiveBase::exitWhenTimeIsUp() {
-	if (timeLimit < 0) return; // 没有设置时间上限
-	if (double(clock() - st)/CLOCKS_PER_SEC * 1000 > timeLimit) exit(0);
+bool KDefectiveBase::timeIsUp() {
+	if (timeLimit < 0) return false; // 没有设置时间上限
+	if (double(clock() - st)/CLOCKS_PER_SEC > timeLimit) {
+		notFinish = true;
+		return true;
+	}
+	return false;
 }
 
 void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
@@ -81,6 +85,18 @@ void KDefectiveBase::removeVertexFromSetSync(void *ptr, int idx, char kind) {
 
 size_t KDefectiveBase::GetCount() {
     return count;
+}
+
+bool KDefectiveBase::GetNotFinishFlag() {
+	return notFinish;
+}
+
+int KDefectiveBase::GetAns() {
+	return ans;
+}
+
+double KDefectiveBase::GetCostTime() {
+	return (double)(ed - st) / (double) CLOCKS_PER_SEC;
 }
 
 void KDefectiveBase::AddEdge(int a, int b) {
@@ -400,7 +416,7 @@ void KDefectiveBase::branch(void *P, void *C, int k, int m) {
 
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
-	this -> exitWhenTimeIsUp();
+	if (this -> timeIsUp()) return;
     
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -436,6 +452,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 int KDefectiveBase::Solve(int k) {
     count = 0;
     st = clock();
+	notFinish = false;
     ans = 0; // init the value of the ans
 
 	// 申请空间
