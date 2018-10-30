@@ -5,16 +5,20 @@ do
 	./KDefective -O generate -n 20 -d 0.1 -w main.in
 	K=`expr $RANDOM % 60`
 	echo k: $K
-	./KDefective -O solve -a Bao -D Bitset -k $K -r main.in > bao.out
-	./KDefective -O solve -a Base -D Bitset -k $K -r main.in > algo.out
+	./KDefective -O solve -a Bao -D Bitset -k $K -r main.in > Bao.out
+	./KDefective -O solve -a Base -D Bitset -k $K -r main.in > Base.out
 
 	echo Bao:
-	cat bao.out
+	cat Bao.out
 
-	echo Algo:
-	cat algo.out
+	echo Base:
+	cat Base.out
 
-	diff bao.out algo.out > /dev/null
+	#只比较第一行
+	head -n 1 Bao.out > Bao.out
+	head -n 1 Base.out > Base.out
+
+	diff Bao.out Base.out > /dev/null
 	if [ $? -ne 0 ] ; then
 		echo Wa
 		exit
