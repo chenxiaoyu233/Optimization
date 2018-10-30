@@ -2,11 +2,11 @@
 
 for ((i = 1; i; i = i + 1))
 do
-	./KDefective gen "20" "0.1"
+	./KDefective -O generate -n 20 -d 0.1 -w main.in
 	K=`expr $RANDOM % 60`
 	echo k: $K
-	./KDefective RDS main.in $K > bao.out
-	./KDefective algo main.in $K > algo.out
+	./KDefective -O solve -a Bao -D Bitset -k $K -r main.in > bao.out
+	./KDefective -O solve -a Base -D Bitset -k $K -r main.in > algo.out
 
 	echo Bao:
 	cat bao.out
