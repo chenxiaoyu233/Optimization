@@ -16,13 +16,13 @@ algoList = ['Base', 'RDS', 'Simple']
 timeLimit = 172800 # = 2 * 24 * 3600
 
 # 数据集的位置
-dataDir = ""
+dataDir = "../../biclique/DIMACS_subset_ASCII"
 
 # 存储结果的位置
-targetDir = ""
+targetDir = "./result"
 
 # 可执行文件的存储位置
-execDir = ""
+execDir = "./KDefective"
 
 # 命令的模板
 cmd = "{} -O solve -a {} -t {} -D Bitset -k {} -r {} > {}" # @todo
@@ -38,26 +38,29 @@ def FindNInDataFile(data):
     for line in lines:
         line = line.split(' ')
         if line[0] == 'p':
-            return line[2]
+            for s in line:
+                if s.isdigit():
+                    return int(s)
 
 
 def AddCommand(algorithm, k, dataFile, resultDir):
     global execDir, timeLimit
     command.append(
-        cmd,
-        execDir, algorithm, timeLimit, k, dataFile,
-        ResultFile(
-            resultDir,
-            dataFile,
-            algorithm,
-            k
+        cmd.format(
+            execDir, algorithm, timeLimit, k, dataFile,
+            ResultFile(
+                resultDir,
+                dataFile,
+                algorithm,
+                k
+            )
         )
     )
 
 def ResultFile(resultDir, dataFile, algorithm, k):
     return os.path.join(
         resultDir, 
-        os.path.basename(dataFile).join('-').join(algorithm).join('-').join(k)
+        '-'.join([os.path.basename(dataFile), algorithm, str(k)])
     )
 
 
