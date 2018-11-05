@@ -48,6 +48,7 @@ void InitGlobalArgs() {
 	globalArgs.timeLimit = -1;
 	globalArgs.algoType = "";
 	globalArgs.dataStructure = "";
+	globalArgs.k = -1;
 
 	globalArgs.vertexNum = 0;
 	globalArgs.edgeDensity = 0.0;

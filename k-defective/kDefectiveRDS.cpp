@@ -26,6 +26,32 @@ int KDefectiveRDS::minInSet(void *C) {
     return -1;
 }
 
+void KDefectiveRDS::reductionByConnective(void *P, void *C) {
+	int *q = new int[size], l = -1, r = -1;
+	bool *vis = new bool[size];
+	memset(q, 0, sizeof(int) * size);
+	memset(vis, 0, sizeof(bool) * size);
+	// P集合中的点进入队列
+	for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
+		vis[i] = true; q[++r] = i;
+	}
+	// bfs维护可达性
+	while (l != r) {
+		int tt = q[++l];
+		for (auto to: from[tt]) {
+			if (!vis[to]) {
+				vis[to] = true;
+				q[++r] = to;
+			}
+		}
+	}
+	// 删除C中不可达的点
+	for (int i = 0; i < size; i++) if (!vis[i] && this -> existsInSet(C, i)) 
+		this -> removeVertexFromSetSync(C, i, 'C');
+	delete[] q;
+	delete[] vis;
+}
+
 void KDefectiveRDS::solve(void *_P, void *_C, int k) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
 	if (this -> timeIsUp()) return;
@@ -41,6 +67,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 		int need = calcNeedEdge(P, C, i);
 		if (need > k) this -> removeVertexFromSetSync(C, i, 'C');
 	}
+	this -> reductionByConnective(P, C); // 删除不可达的边, 保证最后的答案一定是联通的
 
 	// update ans
 	if (this -> sizeOfSet(C) == 0) {

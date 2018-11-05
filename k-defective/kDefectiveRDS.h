@@ -9,6 +9,7 @@ class KDefectiveRDS: public KDefectiveBase {
 	vector <int> order;
 	int *LB; // 下界
 
+	virtual void reductionByConnective(void *P, void *C);
 	void getOrder(vector<int> &vec);
 	virtual void solve(void *P, void *C, int k);
 	int minInSet(void *C);
