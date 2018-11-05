@@ -14,9 +14,9 @@ algoList = ['Base', 'RDS', 'Simple']
 
 # 需要测试的图的规模
 # 点数
-vertexNum = [50, 100, 200, 400]
+vertexNum = [20, 30]
 # 边密度
-edgeDensity = [0.02, 0.04, 0.08, 0.1, 0.2, 0.4]
+edgeDensity = [0.1, 0.2]
 
 # 测试组数
 caseNum = 5
@@ -25,17 +25,17 @@ caseNum = 5
 timeLimit = 172800 # = 2 * 24 * 3600
 
 # 数据集的位置
-dataDir = "./result"
+dataDir = "./graph"
 
 # 存储结果的位置
-targetDir = ""
+targetDir = "./result"
 
 # 可执行文件的存储位置
 execDir = "./KDefective"
 
 # 命令的模板
 solveCmd = "{} -O solve -a {} -t {} -D Bitset -k {} -r {} > {}" 
-generateCmd = "{} -O generate -n {} -d {} > {}"
+generateCmd = "{} -O generate -n {} -d {} -w {}"
 
 # Result:
 command = []

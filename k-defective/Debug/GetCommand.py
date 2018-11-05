@@ -16,7 +16,7 @@ algoList = ['Base', 'RDS', 'Simple']
 timeLimit = 172800 # = 2 * 24 * 3600
 
 # 数据集的位置
-dataDir = "../../biclique/DIMACS_subset_ASCII"
+dataDir = "./graph"
 
 # 存储结果的位置
 targetDir = "./result"

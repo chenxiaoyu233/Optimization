@@ -11,8 +11,9 @@ def getCasePath(dir):
     dirNames = os.listdir(dir)
     dirs = []
     for name in dirNames:
-        path = os.path.join(dirNames, name)
+        path = os.path.join(dir, name)
         dirs.append(path)
+    return dirs
 
 # 为每个Case单独作图
 maxt = 172800
@@ -22,13 +23,13 @@ def drawForCase(caseDir):
     caseName = os.path.basename(caseDir)
     # 数据池
     data = {}
-    data["k"] = [caseName.split('-')[0] * i for i in kl]
+    data["k"] = [int(caseName.split('-')[0]) * i for i in kl]
     data["Base"]  = {"time":[maxt] * len(kl), "count":[maxc] * len(kl)}
     data["RDS"]   = {"time":[maxt] * len(kl), "count":[maxc] * len(kl)}
     data["Simple"]= {"time":[maxt] * len(kl), "count":[maxc] * len(kl)}
 
     # 读数据
-    for f in listdir(caseDir):
+    for f in os.listdir(caseDir):
         filepath = os.path.join(caseDir, f)
         fin = open(filepath, 'r')
         raw = fin.read()
@@ -38,9 +39,10 @@ def drawForCase(caseDir):
         flg = int(raw[3].split(' ')[3])
 
         idx = int(f.split('-')[4]) // int(f.split('-')[0]) - 1
-        if flg == 1:
-            data[f.split('-')[3]]["time"] = tim
-            data[f.split('-')[3]]["count"] = cnt
+
+        if flg == 0:
+            data[f.split('-')[3]]["time"][idx] = tim
+            data[f.split('-')[3]]["count"][idx] = cnt
         pass
     pass
 
@@ -48,16 +50,20 @@ def drawForCase(caseDir):
     plt.figure(1)
     # 绘制时间大小
     plt.subplot(211)
-    plt.plot(data['k'], data['Base']['time'],
-             data['k'], data['RDS']['time'],
-             data['k'], data['Simple']['time'])
+    plt.title(caseName)
+    plt.plot(data['k'], data['Base']['time'], label = 'Base')
+    plt.plot(data['k'], data['RDS']['time'], label = 'RDS')
+    plt.plot(data['k'], data['Simple']['time'], label = 'Simple')
+    plt.legend()
 
     # 绘制搜索树大小
     plt.subplot(212)
-    plt.plot(data['k'], data['Base']['count'],
-             data['k'], data['RDS']['count'],
-             data['k'], data['Simple']['count'])
+    plt.plot(data['k'], data['Base']['count'], label = 'Base')
+    plt.plot(data['k'], data['RDS']['count'], label = 'RDS')
+    plt.plot(data['k'], data['Simple']['count'], label = 'Simple')
+    plt.legend()
 
+    plt.show()
 
 # 主函数
 def main(argv = sys.argv):
