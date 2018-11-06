@@ -73,6 +73,9 @@ class KDefectiveBase {
 	// reduction using diameter
 	virtual void reductionByDiam(void *P, void *C, int k); 
 
+	// upper bound using graph coloring
+	virtual int upperBoundByColor(void *P, void *C, int m);
+
 	// reduction when a vertex connect to all other verteces
 	virtual void reductionByConnectToAll(void *P, void *C);
 

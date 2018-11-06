@@ -295,6 +295,50 @@ void KDefectiveBase::reductionWhenIsolated(void *P, void *C) {
 	}
 }
 
+int KDefectiveBase::upperBoundByColor(void *P, void *C, int m) {
+	// 利用极大独立集对C进行划分
+	// 按C中邻居数量从小到大排序
+	vector <pair<int, int> > vec; vec.clear();
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
+		vec.push_back(make_pair(state.top().neiC[i], i));
+	}
+	sort(vec.begin(), vec.end());
+	// 染色
+	vector<int> part; part.clear();
+	while (vec.size() != 0) {
+		void *Q = this -> newSet();
+		for (vector<pair<int, int> >::iterator it = vec.begin(); it != vec.end(); ) {
+			void *nei = this -> neighborSetOf(it -> second);
+			void *neiQ = this -> setIntersection(nei, Q);
+			if (this -> sizeOfSet(neiQ) == 0) {
+				this -> addVertexToSet(Q, it -> second);
+				it = vec.erase(it);
+			} else {
+				it ++;
+			}
+			this -> deleteSet(nei); 
+			this -> deleteSet(neiQ);
+		}
+		int szQ = this -> sizeOfSet(Q);
+		part.push_back(szQ);
+		this -> deleteSet(Q);
+	}
+	
+	// 通过染色来估计上界
+	int upperBound = 0;
+	int cnt = 0;
+	while (m >= cnt) {
+		for (auto sz: part) if(sz > 0 && m >= cnt) {
+			m -= cnt;
+			-- sz;
+			++ upperBound;
+		}
+		++ cnt;
+	}
+
+	return upperBound + this -> sizeOfSet(P);
+}
+
 bool KDefectiveBase::couldRecudeM(void *P, void *C) { 
 	bool flag = false;
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
@@ -430,7 +474,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 
 	// cut brunch
     //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
-    if (sizeOfSet(P) + sizeOfSet(C) > ans) {
+    if (this -> upperBoundByColor(P, C, m) + sizeOfSet(C) > ans) {
 
         count++; // 统计搜索树的节点大小
         
