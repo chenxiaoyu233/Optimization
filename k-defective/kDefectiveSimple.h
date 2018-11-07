@@ -6,7 +6,8 @@
 
 class KDefectiveSimple: public KDefectiveBase {
 	protected:
-	virtual void branch(void *P, void *C, int k, int m);
+	//virtual void branch(void *P, void *C, int k, int m);
+	virtual void reductionByDiam(void *P, void *C, int k);
 	
 	public:
 	KDefectiveSimple(int n);
