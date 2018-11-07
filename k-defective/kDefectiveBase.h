@@ -73,6 +73,10 @@ class KDefectiveBase {
 	// reduction using diameter
 	virtual void reductionByDiam(void *P, void *C, int k); 
 
+	// reduction by connective 
+	// 在没有使用直径reduction的时候, 必须通过这个规约来保证解是连通的
+	virtual void reductionByConnective(void *P, void *C);
+
 	// upper bound using graph coloring
 	virtual int upperBoundByColor(void *P, void *C, int m);
 
