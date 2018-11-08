@@ -34,9 +34,12 @@ struct globalArgs_t {
 
 	/* 求助类操作 */
 	bool needHelp;        // -h 表示需要帮助
+
+	/* 输入图的文件类型 */
+	string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
 } globalArgs;
 
-static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:";
+static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:";
 
 void InitGlobalArgs() {
 	globalArgs.readFileName = "";
@@ -54,6 +57,8 @@ void InitGlobalArgs() {
 	globalArgs.edgeDensity = 0.0;
 
 	globalArgs.needHelp = false;
+
+	globalArgs.graphFileType = "clq";
 }
 
 void DisplayUsage() {
@@ -124,7 +129,8 @@ bool HaveEnoughArgs(string needArgs) {
 
 int N, M;
 vector<pair<int, int> > edges;
-void ReadGraph() {
+// 读取.clq类型的图
+void ReadGraphClq() {
 	FILE *in = fopen(globalArgs.readFileName.c_str(), "r");
 	char buffer[1005];
 	char flag;
@@ -142,6 +148,26 @@ void ReadGraph() {
     fclose(in);
 }
 
+// 读取.graph类型的图
+#include <sstream>
+#include <fstream>
+void ReadGraphGraph() {
+	ifstream fin(globalArgs.readFileName.c_str());
+	string buffer;
+	getline(fin, buffer);
+	istringstream ss(buffer);
+	ss >> N >> M;
+	for (int i = 1; i <= N; i++) {
+		getline(fin, buffer);
+		istringstream ss(buffer);
+		int tmp;
+		while (!(ss >> tmp).eof()) {
+			int a = i - 1, b = tmp - 1;
+			edges.push_back(make_pair(a, b));
+		}
+	}
+}
+
 void SolveWork() {
 	if (!HaveEnoughArgs("rptaDk")) return;
 	KDefectiveBase *solver = NULL;
@@ -149,7 +175,14 @@ void SolveWork() {
 	int ans = -1;
 
 	// 从文件输入图
-	ReadGraph();
+	if (globalArgs.graphFileType == "clq") {
+		ReadGraphClq();
+	} else if (globalArgs.graphFileType == "graph") {
+		ReadGraphGraph();
+	} else {
+		fprintf(stderr, "error graph file type");
+		exit(2333);
+	}
 
 	// 暴力输出解(用于Debug其他的实现, 当然也包括预处理器)
 	if (globalArgs.algoType == "Bao") { 
@@ -296,6 +329,10 @@ int main(int argc, char** argv) {
 
 			case 'h':
 				globalArgs.needHelp = true;
+				break;
+
+			case 'G':
+				globalArgs.graphFileType = string(optarg);
 				break;
 		}
 	}
