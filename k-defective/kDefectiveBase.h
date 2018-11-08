@@ -75,7 +75,7 @@ class KDefectiveBase {
 
 	// reduction by connective 
 	// 在没有使用直径reduction的时候, 必须通过这个规约来保证解是连通的
-	virtual void reductionByConnective(void *P, void *C);
+	//virtual void reductionByConnective(void *P, void *C);
 
 	// upper bound using graph coloring
 	virtual int upperBoundByColor(void *P, void *C, int m);
@@ -121,6 +121,8 @@ class KDefectiveBase {
 	virtual int GetAns();
 	// 花费的实际时间
 	virtual double GetCostTime();
+	// 设置初始答案
+	virtual void SetAns(int _ans);
 
 };
 

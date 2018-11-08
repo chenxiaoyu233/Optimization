@@ -18,5 +18,5 @@ KDefectiveSimple::KDefectiveSimple(int n): KDefectiveBase(n) { }
 
 void KDefectiveSimple::reductionByDiam(void *P, void *C, int k) {
 	// 取消了直径规约, 不能保证解是连通的, 所以必须加上这个规约
-	this -> reductionByConnective(P, C);
+	//this -> reductionByConnective(P, C);
 }

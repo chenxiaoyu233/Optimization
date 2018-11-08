@@ -37,9 +37,12 @@ struct globalArgs_t {
 
 	/* 输入图的文件类型 */
 	string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
+
+	/* 最大团的大小 */
+	int maxKDefective;        // -M 设置图的最大团的大小
 } globalArgs;
 
-static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:";
+static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:M:";
 
 void InitGlobalArgs() {
 	globalArgs.readFileName = "";
@@ -59,6 +62,8 @@ void InitGlobalArgs() {
 	globalArgs.needHelp = false;
 
 	globalArgs.graphFileType = "clq";
+
+	globalArgs.maxKDefective = 0;
 }
 
 void DisplayUsage() {
@@ -168,6 +173,24 @@ void ReadGraphGraph() {
 	}
 }
 
+void dealDoubleEdge() {
+	fprintf(stderr, "number of edges before dealDoubleEdge: %lu\n", edges.size());
+	// 排序
+	for (size_t i = 0; i < edges.size(); i++) {
+		if (edges[i].first > edges[i].second) swap(edges[i].first, edges[i].second);
+	}
+	sort(edges.begin(), edges.end());
+	// 去重
+	size_t cur = 1;
+	for (size_t last = 0, i = 1; i < edges.size(); ++i, last = i-1) {
+		if (edges[i] != edges[last]) {
+			edges[cur++] = edges[i];
+		}
+	}
+	edges.resize(cur);
+	fprintf(stderr, "number of edges after dealDoubleEdge: %lu\n", edges.size());
+}
+
 void SolveWork() {
 	if (!HaveEnoughArgs("rptaDk")) return;
 	KDefectiveBase *solver = NULL;
@@ -184,6 +207,9 @@ void SolveWork() {
 		exit(2333);
 	}
 
+	// 去重边
+	dealDoubleEdge();
+
 	// 暴力输出解(用于Debug其他的实现, 当然也包括预处理器)
 	if (globalArgs.algoType == "Bao") { 
 		BaoSolver* baoSolver;
@@ -197,12 +223,16 @@ void SolveWork() {
 	// 预处理图
 	if (globalArgs.needPrework) {
 		preworker = new STLSetImplement<set<int>, PreWorker>(N);
+		preworker -> SetAns(globalArgs.maxKDefective);
 		preworker -> AddEdgeByVector(edges);
 		auto ret = preworker -> Process(globalArgs.k);
 
 		// 更新点集和边集
 		edges = ret.first;
 		N = ret.second;
+
+		// 更新当前答案
+		globalArgs.maxKDefective = preworker -> GetAns();
 		
         // 回收内存
 		delete preworker;
@@ -213,10 +243,10 @@ void SolveWork() {
 		if (globalArgs.algoType == "Base") solver = new STLSetImplement<set<int>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
-	} else if (globalArgs.dataStructure == "Bitset" && N <= 2000) {
-		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<2048>, KDefectiveBase>(N);
-		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<2048>, KDefectiveRDS>(N);
-		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<2048>, KDefectiveSimple>(N);
+	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
+		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<5000>, KDefectiveBase>(N);
+		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<5000>, KDefectiveRDS>(N);
+		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<5000>, KDefectiveSimple>(N);
 	}
 
 	// 判断solver是否构造成功
@@ -224,6 +254,9 @@ void SolveWork() {
 		puts("can not initialize the solver");
 		return;
 	}
+
+	// 设置答案下界
+	solver -> SetAns(globalArgs.maxKDefective);
 
 	// 设置时间上限
 	solver -> SetTimeLimit(globalArgs.timeLimit);
@@ -333,6 +366,10 @@ int main(int argc, char** argv) {
 
 			case 'G':
 				globalArgs.graphFileType = string(optarg);
+				break;
+
+			case 'M':
+				globalArgs.maxKDefective = atoi(optarg);
 				break;
 		}
 	}

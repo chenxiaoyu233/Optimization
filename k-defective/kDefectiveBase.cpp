@@ -10,6 +10,11 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
     isInPC = new bool[n];
 	neiSet = new void*[n];
 	timeLimit = -1;
+	ans = 0; // 初始化答案
+}
+
+void KDefectiveBase::SetAns(int _ans) {
+	ans = _ans;
 }
 
 KDefectiveBase::~KDefectiveBase() {
@@ -164,6 +169,7 @@ int KDefectiveBase::calcNeedEdge(void *P, void *C, int idx) {
 void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		int need = this -> calcNeedEdge(P, C, i);
+		//fprintf(stderr, "need %d\n", need);
 		if (need > m) this -> removeVertexFromSetSync(C, i, 'C');
 	}
 }
@@ -276,31 +282,47 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	}
 }
 
-void KDefectiveBase::reductionByConnective(void *P, void *C) {
-	int *q = new int[size], l = -1, r = -1;
-	bool *vis = new bool[size];
-	memset(q, 0, sizeof(int) * size);
-	memset(vis, 0, sizeof(bool) * size);
-	// P集合中的点进入队列
-	for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
-		vis[i] = true; q[++r] = i;
-	}
-	// bfs维护可达性
-	while (l != r) {
-		int tt = q[++l];
-		for (auto to: from[tt]) {
-			if (!vis[to]) {
-				vis[to] = true;
-				q[++r] = to;
+/*void KDefectiveBase::reductionByConnective(void *P, void *C) {
+	if (this -> sizeOfSet(P) == 0) return;
+	//fprintf(stderr, "size of c before connective reduction: %d\n", this -> sizeOfSet(C));
+	int flag = true;
+	while (flag) {
+		flag = false;
+		int *q = new int[size], l = -1, r = -1;
+		bool *vis = new bool[size];
+		memset(q, 0, sizeof(int) * size);
+		memset(vis, 0, sizeof(bool) * size);
+		// P集合中的点进入队列
+		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
+			vis[i] = true; q[++r] = i;
+			break;
+		}
+		// bfs维护可达性
+		while (l != r) {
+			int tt = q[++l];
+			for (auto to: from[tt]) {
+				if (this -> existsInSet(P, to) || this -> existsInSet(C, to)) {
+					if (!vis[to]) {
+						vis[to] = true;
+						q[++r] = to;
+					}
+				}
 			}
 		}
+		// 检查P中的点是否全部连通
+		for (int i = 0; i < size; i++) if (!vis[i] && this -> existsInSet(P, i)) {
+			//fprintf(stderr, "p is not a connective complonent.\n");
+		}
+		// 删除C中不可达的点
+		for (int i = 0; i < size; i++) if (!vis[i] && this -> existsInSet(C, i)) {
+			this -> removeVertexFromSetSync(C, i, 'C');
+			flag = true;
+		}
+		delete[] q;
+		delete[] vis;
 	}
-	// 删除C中不可达的点
-	for (int i = 0; i < size; i++) if (!vis[i] && this -> existsInSet(C, i)) 
-		this -> removeVertexFromSetSync(C, i, 'C');
-	delete[] q;
-	delete[] vis;
-}
+	//fprintf(stderr, "size of c after connective reduction: %d\n", this -> sizeOfSet(C));
+}*/
 
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
 	int szP = this -> sizeOfSet(P), szC = this -> sizeOfSet(C);
@@ -526,7 +548,8 @@ int KDefectiveBase::Solve(int k) {
     count = 0;
     st = clock();
 	notFinish = false;
-    ans = 0; // init the value of the ans
+	
+    //ans = 0; // init the value of the ans
 
 	// 申请空间
 	void *P = this -> newSet(), *C = this -> newSet();

@@ -41,7 +41,6 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 		int need = calcNeedEdge(P, C, i);
 		if (need > k) this -> removeVertexFromSetSync(C, i, 'C');
 	}
-	this -> reductionByConnective(P, C); // 删除不可达的边, 保证最后的答案一定是联通的
 
 	// update ans
 	if (this -> sizeOfSet(C) == 0) {
@@ -60,7 +59,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 		this -> removeVertexFromSetSync(C, order[idx], 'C');
 		int need = calcNeedEdge(P, C, order[idx]);
 		this -> addVertexToSetSync(P, order[idx], 'P');
-		solve(P, C, k - need);
+		if (k >= need) solve(P, C, k - need);
 		this -> removeVertexFromSetSync(P, order[idx], 'P');
 	}
 
@@ -70,7 +69,7 @@ void KDefectiveRDS::solve(void *_P, void *_C, int k) {
 
 int KDefectiveRDS::Solve(int k) {
     count = 0;
-    ans = 0;
+    //ans = 0;
 	notFinish = false;
     st = clock();
 	memset(LB, 0, sizeof(int) * size);

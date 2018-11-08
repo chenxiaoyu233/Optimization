@@ -79,7 +79,7 @@ pair<vector<pair<int, int> >, int> PreWorker::Process(int k) {
     // 初始化
     mallocMem();
 	void *P = this -> newSet(), *C = this -> newSet();
-    ans = 0;
+    //ans = 0;
 	init(P, C);
 
 	// 计算下界 (目前这个计算还是有问题的, 需要注意)
