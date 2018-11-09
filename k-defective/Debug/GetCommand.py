@@ -7,13 +7,13 @@ import os
 # Parameters: 用于控制生成的指令
 
 # k值的取值范围(n的倍数)
-kList = [1, 2, 3, 4, 5]
+kList = [1, 4]
 
 # 需要测试的算法类型
 algoList = ['Base', 'RDS', 'Simple']
 
 # 时间上限
-timeLimit = 172800 # = 2 * 24 * 3600
+timeLimit = 7200 # = 2 * 3600
 
 # 数据集的位置
 dataDir = "./graph"
@@ -25,7 +25,7 @@ targetDir = "./result"
 execDir = "./KDefective"
 
 # 命令的模板
-cmd = "{} -O solve -a {} -t {} -D Bitset -k {} -r {} > {}" # @todo
+cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p > {8}" # @todo
 
 # Result:
 command = ['#!/bin/bash']
@@ -43,11 +43,12 @@ def FindNInDataFile(data):
                     return int(s)
 
 
-def AddCommand(algorithm, k, dataFile, resultDir):
+def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStructure):
     global execDir, timeLimit
     command.append(
         cmd.format(
-            execDir, algorithm, timeLimit, k, dataFile,
+            execDir, algorithm, timeLimit, dataStructure, k, dataFile,
+            fileType, cliqueSize,
             ResultFile(
                 resultDir,
                 dataFile,
@@ -65,8 +66,13 @@ def ResultFile(resultDir, dataFile, algorithm, k):
 
 
 def main(argv = sys.argv):
-    files = os.listdir(dataDir)
-    for fileName in files:
+    fin = open("TestList_10th.txt", "r")
+    cases = fin.read().split('\n')
+    for item in cases:
+        item = item.split(' ')
+        if len(item) < 4:
+            break
+        fileName = item[0]
         # 数据文件
         dataFile = os.path.join(dataDir, fileName)
 
@@ -77,17 +83,14 @@ def main(argv = sys.argv):
         if not os.path.exists(resultDir):
             os.mkdir(resultDir)
 
-        # 从数据文件中读取图的规模
-        n = FindNInDataFile(dataFile)
-
         # 生成指令
         for t in kList:
             for algo in algoList:
-                AddCommand(algo, t * n, dataFile, resultDir)
+                AddCommand(algo, t, dataFile, resultDir, item[1], item[2], item[3])
     
     # 将指令输出
     for line in command:
-        print(line, end  = '\n')
+        print(line)
 
 
 
