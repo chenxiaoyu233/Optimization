@@ -39,7 +39,7 @@ struct globalArgs_t {
 	string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
 
 	/* 最大团的大小 */
-	int maxKDefective;        // -M 设置图的最大团的大小
+	int maxKDefective;    // -M 设置图的最大团的大小
 } globalArgs;
 
 static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:M:";
@@ -173,6 +173,29 @@ void ReadGraphGraph() {
 	}
 }
 
+// 读取SNAP类型的图(txt)
+void ReadGraphSnap() {
+	ifstream fin(globalArgs.readFileName.c_str());
+	string buffer;
+	while (!getline(fin, buffer).eof()) {
+		// 判断是否当前行是注释
+		size_t idx = 0; 
+		while (idx < buffer.length() && buffer[idx] == ' ') ++idx;
+		if (idx >= buffer.length() || buffer[idx] == '#') continue;
+		// 读取本行数据
+		istringstream ss(buffer);
+		int a, b; ss >> a >> b;
+		--a; --b;
+		edges.push_back(make_pair(a, b));
+	}
+	// 设置N, M
+	M = edges.size();
+	for (auto e: edges) {
+		N = max(N, e.first + 1);
+		N = max(N, e.second + 1);
+	}
+}
+
 void dealDoubleEdge() {
 	fprintf(stderr, "number of edges before dealDoubleEdge: %lu\n", edges.size());
 	// 排序
@@ -202,6 +225,8 @@ void SolveWork() {
 		ReadGraphClq();
 	} else if (globalArgs.graphFileType == "graph") {
 		ReadGraphGraph();
+	} else if (globalArgs.graphFileType == "SNAP") {
+		ReadGraphSnap();
 	} else {
 		fprintf(stderr, "error graph file type");
 		exit(2333);
