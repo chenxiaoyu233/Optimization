@@ -83,6 +83,9 @@ class KDefectiveBase {
 	// reduction when a vertex connect to all other verteces
 	virtual void reductionByConnectToAll(void *P, void *C);
 
+	// reduction when C could be add to P directly
+	virtual bool reductionByC2P(void *P, void *C, int m);
+
 	// calc the distance from idx
 	virtual void calcDisFrom(void *P, void *C, int s); 
 

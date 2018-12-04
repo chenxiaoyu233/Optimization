@@ -343,6 +343,22 @@ void KDefectiveBase::reductionWhenIsolated(void *P, void *C) {
 	}
 }
 
+bool KDefectiveBase::reductionByC2P(void *P, void *C, int m) {
+	int szP = this -> sizeOfSet(P), szC = this -> sizeOfSet(C);
+	int costP = 0, costC = 0;
+	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
+		costP += szP - state.top().neiP[i];
+		costC += szC - state.top().neiC[i];
+	}
+	int cost = costP + (costC >> 1);
+	bool flag = false;
+	if (cost <= m) {
+		flag = true;
+		ans = max(ans, szP + szC);
+	}
+	return flag;
+}
+
 int KDefectiveBase::upperBoundByColor(void *P, void *C, int m) {
 	// 利用极大独立集对C进行划分
 	// 按C中邻居数量从小到大排序
@@ -523,21 +539,24 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	this -> reductionWhenIsolated(P, C);
 	this -> reductionByDiam(P, C, k);
 
-	// cut brunch
-    //printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
-    if (this -> upperBoundByColor(P, C, m) + sizeOfSet(C) > ans) {
+	if (!this -> reductionByC2P(P, C, m)) {
 
-        count++; // 统计搜索树的节点大小
-        
-        // update ans
-        if (sizeOfSet(C) == 0) {
-            ans = max(ans, sizeOfSet(P));
-            fprintf(stderr, "new ans: %d\n", ans);
-        } else {
-            // branch
-            this -> branch(P, C, k, m);
-        }
-    }
+		// cut brunch
+		//printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
+		if (this -> upperBoundByColor(P, C, m) + sizeOfSet(C) > ans) {
+
+			count++; // 统计搜索树的节点大小
+			
+			// update ans
+			if (sizeOfSet(C) == 0) {
+				ans = max(ans, sizeOfSet(P));
+				fprintf(stderr, "new ans: %d\n", ans);
+			} else {
+				// branch
+				this -> branch(P, C, k, m);
+			}
+		}
+	}
 
 	// free the menory
 	this -> popState();
