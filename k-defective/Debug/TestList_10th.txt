@@ -11,7 +11,7 @@ Wiki-Vote.txt 17 SNAP Bitset
 web-BerkStan.txt 201 SNAP Bitset
 p2p-Gnutella04.txt 4 SNAP Set
 p2p-Gnutella24.txt 4 SNAP Set
-P2p-Guntella25.txt 4 SNAP Set
+p2p-Guntella25.txt 4 SNAP Set
 Email-EuAll.txt 16 SNAP Bitset
 netscience.graph 20 graph Bitset
 polblogs.graph 20 graph Bitset
