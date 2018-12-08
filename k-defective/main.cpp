@@ -261,6 +261,7 @@ void SolveWork() {
 		
         // 回收内存
 		delete preworker;
+		fprintf(stderr, "finish prework");
 	}
 
 	// 创建求解器
