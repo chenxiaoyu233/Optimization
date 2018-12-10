@@ -6,36 +6,36 @@ import os
 
 # Parameters: 用于控制生成的指令
 
-# k值的取值范围(n的倍数)
+# range for k
 kList = [1, 2, 3, 4, 5]
 
-# 需要测试的算法类型
-algoList = ['Base', 'RDS', 'Simple']
+# algorithm type for test
+algoList = ['Base', 'RDS']
 
-# 需要测试的图的规模
-# 点数
-vertexNum = [20, 30]
-# 边密度
-edgeDensity = [0.1, 0.2]
+# the scale of the graph
+# vertex number
+vertexNum = [20, 30, 40, 50, 60, 70, 80, 90, 100]
+# edge density
+edgeDensity = [0.1]
 
-# 测试组数
-caseNum = 5
+# test case
+caseNum = 1
 
-# 时间上限
+# time limit
 timeLimit = 172800 # = 2 * 24 * 3600
 
-# 数据集的位置
+# data set location
 dataDir = "./graph"
 
-# 存储结果的位置
+# result location
 targetDir = "./result"
 
-# 可执行文件的存储位置
+# location for exec file
 execDir = "./KDefective"
 
-# 命令的模板
-solveCmd = "{} -O solve -a {} -t {} -D Bitset -k {} -r {} > {}" 
-generateCmd = "{} -O generate -n {} -d {} -w {}"
+# template for instruction
+solveCmd = "{0} -O solve -a {1} -t {2} -D Bitset -k {3} -r {4} > {5}" 
+generateCmd = "{0} -O generate -n {1} -d {2} -w {3}"
 
 # Result:
 command = []
@@ -72,13 +72,13 @@ def main(argv = sys.argv):
     for n in vertexNum:
         for d in edgeDensity:
             for case in range(0, caseNum):
-                # 生成随机图
+                # generate random graph
                 graphPath = os.path.join(dataDir, '-'.join([str(n), str(d), str(case)]))
                 AddGenerateCommand(n, d, graphPath);
     
-    # 将指令输出
+    # print the command
     for line in command:
-        print(line, end  = '\n')
+        print(line)
 
 
 if __name__ == "__main__":
