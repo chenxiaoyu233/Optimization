@@ -214,6 +214,32 @@ void dealDoubleEdge() {
 	fprintf(stderr, "number of edges after dealDoubleEdge: %lu\n", edges.size());
 }
 
+void discreteVertex() {
+	// 统计点的编号并排序
+	vector<int> vec; vec.clear();
+	int before = 0;
+	for (auto &e: edges) {
+		vec.push_back(e.first); vec.push_back(e.second);
+		before = max(before, e.first); before = max(before, e.second);
+	}
+	fprintf(stderr, "number of vertex before discreteVertex: %d\n", before);
+	sort(vec.begin(), vec.end());
+
+	// 去重
+	size_t p = 1;
+	for (size_t i = 1; i < vec.size(); i++) {
+		if (vec[i] != vec[p-1]) vec[p++] = vec[i];
+	}
+	vec.resize(p);
+	fprintf(stderr, "number of vertex after discreteVertex: %lu\n", p);
+
+	// 更新边
+	for(auto &e: edges) {
+		e.first = *lower_bound(vec.begin(), vec.end(), e.first);
+		e.second = *lower_bound(vec.begin(), vec.end(), e.second);
+	}
+}
+
 void SolveWork() {
 	if (!HaveEnoughArgs("rptaDk")) return;
 	KDefectiveBase *solver = NULL;
@@ -232,6 +258,8 @@ void SolveWork() {
 		exit(2333);
 	}
 
+	// 对图中的点进行离散化
+	discreteVertex();
 	// 去重边
 	dealDoubleEdge();
 
