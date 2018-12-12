@@ -217,12 +217,10 @@ void dealDoubleEdge() {
 void discreteVertex() {
 	// 统计点的编号并排序
 	vector<int> vec; vec.clear();
-	int before = 0;
 	for (auto &e: edges) {
 		vec.push_back(e.first); vec.push_back(e.second);
-		before = max(before, e.first); before = max(before, e.second);
 	}
-	fprintf(stderr, "number of vertex before discreteVertex: %d\n", before);
+	fprintf(stderr, "number of vertex before discreteVertex: %d\n", N);
 	sort(vec.begin(), vec.end());
 
 	// 去重
@@ -231,12 +229,13 @@ void discreteVertex() {
 		if (vec[i] != vec[p-1]) vec[p++] = vec[i];
 	}
 	vec.resize(p);
+	N = p;
 	fprintf(stderr, "number of vertex after discreteVertex: %lu\n", p);
 
 	// 更新边
 	for(auto &e: edges) {
-		e.first = *lower_bound(vec.begin(), vec.end(), e.first);
-		e.second = *lower_bound(vec.begin(), vec.end(), e.second);
+		e.first = lower_bound(vec.begin(), vec.end(), e.first) - vec.begin();
+		e.second = lower_bound(vec.begin(), vec.end(), e.second) - vec.begin();
 	}
 }
 

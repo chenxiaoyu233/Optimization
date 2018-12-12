@@ -75,6 +75,7 @@ int KDefectiveRDS::Solve(int k) {
 	memset(LB, 0, sizeof(int) * size);
 	getOrder(order);
 	for (int i = size-1; i >= 0; i--) {
+		if (this -> timeIsUp()) break;
 		void *P = this -> newSet(), *C = this -> newSet();
 		state.push(State(size));
 		memset(state.top().neiC, 0, sizeof(int) * size);
