@@ -271,7 +271,7 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 			this -> calcDisFrom(P, C, i);
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
-				if (dis[*it] > maxDiam) {
+				if (dis[*it] > maxDiam  && dis[*it] != 0x3f3f3f3f ) {
 					this -> removeVertexFromSetSync(C, *it, 'C');
 					isInPC[*it] = false;
 					it = inC.erase(it);
