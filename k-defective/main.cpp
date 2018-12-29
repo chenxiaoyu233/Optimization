@@ -252,13 +252,15 @@ void SolveWork() {
 		ReadGraphGraph();
 	} else if (globalArgs.graphFileType == "SNAP") {
 		ReadGraphSnap();
+
+		// 对图中的点进行离散化
+		// 因为SNAP类型的图没有事先给定点的个数
+		discreteVertex();
 	} else {
 		fprintf(stderr, "error graph file type");
 		exit(2333);
 	}
 
-	// 对图中的点进行离散化
-	discreteVertex();
 	// 去重边
 	dealDoubleEdge();
 
