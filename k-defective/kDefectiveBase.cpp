@@ -184,7 +184,7 @@ int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
 			return ((2 * (float)sz + 1) - sqrt(delta))/(float)2;
 	}
 
-	return sizeOfSet(P) + sizeOfSet(C) - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
+	return state.top().sizeP + state.top().sizeC - 1; // 大小为sz的图中, 任何简单路径的长度最多为sz-1
 }
 
 /*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
@@ -270,8 +270,11 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 		flag = false;
 		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 			this -> calcDisFrom(P, C, i);
+			int maxDis = 0;
+			for (int j = 0; j < size; j++) if (dis[j] != 0x3f3f3f3f) maxDis = max(maxDis, dis[i]);
+			for (int j = 0; j < size; j++) if (dis[j] == 0x3f3f3f3f) dis[j] = maxDis + 1;
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
-				if (dis[*it] > maxDiam  && dis[*it] != 0x3f3f3f3f ) {
+				if (dis[*it] > maxDiam) {
 					this -> removeVertexFromSetSync(C, *it, 'C');
 					isInPC[*it] = false;
 					it = inC.erase(it);
@@ -325,7 +328,7 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 }*/
 
 void KDefectiveBase::reductionByConnectToAll(void *P, void *C) {
-	int szP = this -> sizeOfSet(P), szC = this -> sizeOfSet(C);
+	int szP = state.top().sizeP, szC = state.top().sizeC;
 	for (int i = 0; i < size; i++) if(this -> existsInSet(C, i)) {
 		if (state.top().neiC[i] + state.top().neiP[i] == szP + szC - 1) { 
 			// 减去1, 因为在计算的时候没有包含自己
@@ -344,7 +347,7 @@ void KDefectiveBase::reductionWhenIsolated(void *P, void *C) {
 }
 
 bool KDefectiveBase::reductionByC2P(void *P, void *C, int m) {
-	int szP = this -> sizeOfSet(P), szC = this -> sizeOfSet(C);
+	int szP = state.top().sizeP, szC = state.top().sizeC;
 	int costP = 0, costC = 0;
 	for (int i = 0; i < size; i++) if (this -> existsInSet(C, i)) {
 		costP += szP - state.top().neiP[i];
@@ -355,6 +358,7 @@ bool KDefectiveBase::reductionByC2P(void *P, void *C, int m) {
 	if (cost <= m) {
 		flag = true;
 		ans = max(ans, szP + szC);
+		fprintf(stderr, "new ans: %d\n", ans);
 	}
 	return flag;
 }
@@ -403,7 +407,7 @@ int KDefectiveBase::upperBoundByColor(void *P, void *C, int m) {
 	//fprintf(stderr, "upperBound: %d\n", upperBound);
 	//fprintf(stderr, "size of C : %d\n", this -> sizeOfSet(C));
 
-	return upperBound + this -> sizeOfSet(P);
+	return upperBound + state.top().sizeP;
 }
 
 bool KDefectiveBase::couldRecudeM(void *P, void *C) { 
@@ -536,14 +540,14 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	// reduction
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByConnectToAll(P, C);
-	this -> reductionWhenIsolated(P, C);
-	this -> reductionByDiam(P, C, k);
+	//this -> reductionWhenIsolated(P, C);
+	//this -> reductionByDiam(P, C, k);
 
-	if (!this -> reductionByC2P(P, C, m)) {
+	if (state.top().sizeC + state.top().sizeP <= ans || !this -> reductionByC2P(P, C, m)) {
 
 		// cut brunch
 		//printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
-		if (this -> upperBoundByColor(P, C, m) + sizeOfSet(C) > ans) {
+		if (this -> upperBoundByColor(P, C, m) > ans) {
 
 			count++; // 统计搜索树的节点大小
 			
