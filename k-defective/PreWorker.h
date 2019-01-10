@@ -19,6 +19,8 @@ class PreWorker: public KDefectiveBase {
     
     void mallocMem();
     void freeMem();
+	void cliqueHeu(void *U, int curSize);
+	void maxCliqueHeu();
 
 	// 将预处理完之后的边集合返回
 	vector<pair<int, int> > getEdges();

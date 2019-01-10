@@ -101,7 +101,7 @@ class KDefectiveBase {
 	virtual void branchWhenCouldReduceM(void *P, void *C, int k, int m);
 	virtual bool couldRecudeM(void *P, void *C);
 
-	virtual void prework(void *P, void *C, int k);
+	//virtual void prework(void *P, void *C, int k);
 
 	void init(void *P, void *C);
 	virtual void solve(void *_P, void *_C, int k, int m);

@@ -118,6 +118,7 @@ void KDefectiveBase::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 }
 
 // 目前使用这个函数可能会导致得到的答案是不联通的
+/*
 void KDefectiveBase::prework(void *_P, void *_C, int k) {
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
@@ -137,7 +138,7 @@ void KDefectiveBase::prework(void *_P, void *_C, int k) {
 	this -> popState();
 	this -> deleteSet(P);
 	this -> deleteSet(C);
-}
+}*/
 
 void KDefectiveBase::init(void *P, void *C) {
 	this -> __init__(P, C); 

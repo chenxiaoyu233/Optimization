@@ -3,6 +3,7 @@
 PreWorker::PreWorker(int n):KDefectiveBase(n) { 
 	edges.clear();
 	neiSet = new set<int>*[n];
+	ans = 0; 
 }
 
 PreWorker::~PreWorker() {
@@ -19,12 +20,12 @@ void PreWorker::deleteIllegalVertex(int k) {
 	//for (int i = 0; i < size; i++) if (this -> existsInSet(selected, i)) {
 		//fprintf(stderr, "size of neighbor set: %d\n", this -> sizeOfSet(neiSet[i]));
 	//}
-	fprintf(stderr, "prework ans - k - 1: %d\n", ans - k - 1);
+	fprintf(stderr, "prework ans - k: %d\n", ans - k);
 	/* Debug */
 
 	// 队列初始化
 	for (int i = 0; i < size; i++) 
-		if (this -> existsInSet(selected, i) && this -> sizeOfSet(neiSet[i]) < ans - k - 1) {
+		if (this -> existsInSet(selected, i) && this -> sizeOfSet(neiSet[i]) < ans - k) {
 			q.push(i);
 			inq[i] = true;
 		}
@@ -38,8 +39,8 @@ void PreWorker::deleteIllegalVertex(int k) {
 		for (auto to: *neiSet[tt]) {
 			neiSet[to] -> erase(tt);
 			if (this -> existsInSet(selected, to) &&
-			    this -> sizeOfSet(neiSet[to]) < ans - k - 1 && !inq[to]) {
-				q.push(to);
+			    this -> sizeOfSet(neiSet[to]) < ans - k && !inq[to]) {
+				q.push(to); inq[to] = true;
 			}
 		}
 	}
@@ -71,19 +72,59 @@ void PreWorker::freeMem() {
 void PreWorker::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 	// 保证基类加边正常
 	KDefectiveBase::AddEdgeByVector(edges);
-
 	this -> edges = edges;
+}
+
+void PreWorker::cliqueHeu(void *U, int curSize) {
+    int sizeA = this -> sizeOfSet(U);
+	if (this -> sizeOfSet(U) == 0) {
+		ans = max(ans, curSize);
+		return;
+	}
+
+	// select a vertex u of maximum degree
+	int u = -1, deg = -1; 
+	for (int i = 0; i < size; i++) if (this -> existsInSet(U, i)) {
+		if ((int) from[i].size() > deg) {
+			deg = from[i].size(); u = i;
+		}
+	}
+
+	// update set U
+	this -> removeVertexFromSet(U, u);
+	void *neiu = this -> newSet();
+	for (auto &to: from[u]) if(from[to].size() > (size_t) ans){
+		this -> addVertexToSet(neiu, to);
+	}
+	void *intersec = this -> setIntersection(neiu, U);
+	this -> setCopyTo(intersec, U);
+	this -> deleteSet(intersec);
+	this -> deleteSet(neiu);
+
+	cliqueHeu(U, curSize+1);
+}
+
+void PreWorker::maxCliqueHeu() {
+	for (int i = 0; i < size; i++) {
+		if (from[i].size() > (size_t) ans) {
+			void *U = this -> newSet();
+			for (auto &to: from[i]) if(from[to].size() > (size_t) ans) {
+				this -> addVertexToSet(U, to);
+			}
+			cliqueHeu(U, 1);
+			this -> deleteSet(U);
+		}
+	}
+    for (int i = 0; i < size; i++)
+        fprintf(stderr, "deg(%d): %lu\n", i, from[i].size());
 }
 
 pair<vector<pair<int, int> >, int> PreWorker::Process(int k) {
     // 初始化
     mallocMem();
-	void *P = this -> newSet(), *C = this -> newSet();
-    //ans = 0;
-	init(P, C);
 
 	// 计算下界 (目前这个计算还是有问题的, 需要注意)
-	for (int i = 0; i < 100; i++) prework(P, C, k); 
+	maxCliqueHeu();
 
 	// 删除一定不包含在答案中的点
 	deleteIllegalVertex(k);
