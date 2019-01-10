@@ -214,6 +214,17 @@ void dealDoubleEdge() {
 	fprintf(stderr, "number of edges after dealDoubleEdge: %lu\n", edges.size());
 }
 
+void dealSelfRing() {
+	fprintf(stderr, "number of edges before dealSelfRing: %lu\n", edges.size());
+	vector<pair<int, int> > tmp; tmp.clear();
+	for (auto &e: edges) {
+		if (e.first != e.second) tmp.push_back(e);
+	}
+	edges = tmp;
+	M = edges.size();
+	fprintf(stderr, "number of edges after dealSelfRing: %lu\n", edges.size());
+}
+
 void discreteVertex() {
 	// 统计点的编号并排序
 	vector<int> vec; vec.clear();
@@ -263,6 +274,8 @@ void SolveWork() {
 
 	// 去重边
 	dealDoubleEdge();
+	// 去自环
+	dealSelfRing();
 
 	// 暴力输出解(用于Debug其他的实现, 当然也包括预处理器)
 	if (globalArgs.algoType == "Bao") { 

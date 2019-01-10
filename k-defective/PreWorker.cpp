@@ -37,7 +37,7 @@ void PreWorker::deleteIllegalVertex(int k) {
 		this -> removeVertexFromSet(selected, tt);
 
 		for (auto to: *neiSet[tt]) {
-			neiSet[to] -> erase(tt);
+            this -> removeVertexFromSet(neiSet[to], tt);
 			if (this -> existsInSet(selected, to) &&
 			    this -> sizeOfSet(neiSet[to]) < ans - k && !inq[to]) {
 				q.push(to); inq[to] = true;
@@ -76,7 +76,6 @@ void PreWorker::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 }
 
 void PreWorker::cliqueHeu(void *U, int curSize) {
-    int sizeA = this -> sizeOfSet(U);
 	if (this -> sizeOfSet(U) == 0) {
 		ans = max(ans, curSize);
 		return;
@@ -105,18 +104,16 @@ void PreWorker::cliqueHeu(void *U, int curSize) {
 }
 
 void PreWorker::maxCliqueHeu() {
+	void *U = this -> newSet();
 	for (int i = 0; i < size; i++) {
 		if (from[i].size() > (size_t) ans) {
-			void *U = this -> newSet();
 			for (auto &to: from[i]) if(from[to].size() > (size_t) ans) {
 				this -> addVertexToSet(U, to);
 			}
 			cliqueHeu(U, 1);
-			this -> deleteSet(U);
 		}
 	}
-    for (int i = 0; i < size; i++)
-        fprintf(stderr, "deg(%d): %lu\n", i, from[i].size());
+	this -> deleteSet(U);
 }
 
 pair<vector<pair<int, int> >, int> PreWorker::Process(int k) {
