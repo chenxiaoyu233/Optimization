@@ -28,7 +28,8 @@ class KDefectiveBase {
 		int size;
 		int *neiP, *neiC;
 		int sizeP, sizeC;
-		bool diamReductionFlag; // 是否已经使用过直径规约
+		int diamReductionFlag; // 是否已经使用过直径规约
+		int colorUpperBoundFlag; // 是否已经使用过染色
 
 		State(int n);
 		State(const State &other); // 复制构造函数

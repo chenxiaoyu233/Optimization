@@ -41,7 +41,8 @@ void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
 	neiC = new int[n];
-	diamReductionFlag = false;
+	diamReductionFlag = 20;
+	colorUpperBoundFlag = 20;
 }
 
 KDefectiveBase::State::~State() {
@@ -54,6 +55,7 @@ KDefectiveBase::State::State(const State &other) {
 	sizeP = other.sizeP;
 	sizeC = other.sizeC;
 	diamReductionFlag = other.diamReductionFlag;
+	colorUpperBoundFlag = other.colorUpperBoundFlag;
 	neiP = new int[size];
 	neiC = new int[size];
 	memcpy(neiP, other.neiP, sizeof(int) * size);
@@ -328,7 +330,11 @@ void KDefectiveBase::calcNearByVertecesApprox(void *P, void *C) {
 	}
 }*/
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
-	state.top().diamReductionFlag = true;
+	if (state.top().diamReductionFlag > 0) {
+		state.top().diamReductionFlag --;
+	} else {
+		return;
+	}
     int maxDiam = this -> calcLimOfDiam(P, C, k);
 	//fprintf(stderr, "sz: %d, maxDiam: %d, k: %d\n", ans, maxDiam, k);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
@@ -446,6 +452,11 @@ bool KDefectiveBase::reductionByC2P(void *P, void *C, int m) {
 }
 
 int KDefectiveBase::upperBoundByColor(void *P, void *C, int m) {
+	if (state.top().colorUpperBoundFlag > 0) {
+		state.top().colorUpperBoundFlag --;
+	} else {
+		return 0x3f3f3f3f;
+	}
 	// 利用极大独立集对C进行划分
 	// 按C中邻居数量从小到大排序
 	vector <pair<int, int> > vec; vec.clear();
@@ -623,7 +634,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByConnectToAll(P, C);
 	//this -> reductionWhenIsolated(P, C);
-	if (m != 0 && k < ans && state.top().sizeP != 0 && !state.top().diamReductionFlag) this -> reductionByDiam(P, C, k);
+	if (m != 0 && k < ans && state.top().sizeP != 0) this -> reductionByDiam(P, C, k);
 	//this -> reductionByDiam(P, C, k);
 
 	if (state.top().sizeC + state.top().sizeP <= ans || !this -> reductionByC2P(P, C, m)) {
