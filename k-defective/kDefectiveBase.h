@@ -14,12 +14,13 @@ class KDefectiveBase {
 	int timeLimit; // 用于使程序在指定的时间内退出
     bool *isInPC; // 用于加速计算距离(calcDisFrom)
 	vector <int> *from; // 邻接链表;
+    void **neiSet; // 每个点的邻居节点集合
+	void **neiSet2; // 每个点的2度邻居(邻居的邻居)集合 (2度+1度邻居)
 
-	// 用于记录是否是因为时间上限到了而结束的 
+
+	// 用于记录是否是因为时间上限到了而结束的
 	// 如果为真表示是超时结束的
-	bool notFinish; 
-
-	void **neiSet; // 邻居集合 (待实现)
+	bool notFinish;
 
 	//中间状态, 不方便存在递归栈中
 	class State {
@@ -28,7 +29,7 @@ class KDefectiveBase {
 		int *neiP, *neiC;
 		int sizeP, sizeC;
 		bool diamReductionFlag; // 是否已经使用过直径规约
-		
+
 		State(int n);
 		State(const State &other); // 复制构造函数
 		~State();
@@ -90,6 +91,10 @@ class KDefectiveBase {
 	// calc the distance from idx
 	virtual void calcDisFrom(void *P, void *C, int s, int maxDiam); 
 	//virtual void calcDisFrom(void *P, void *C, int s); 
+
+	// 计算到P的距离不超过2的点的集合 (G中)
+	virtual void calcNearByVerteces(void *P, void *C);
+	virtual void calcNearByVertecesApprox(void *P, void *C);
 
 	// calc the number of needed edge if add idx from C to P
 	virtual int calcNeedEdge(void *P, void *C, int idx);

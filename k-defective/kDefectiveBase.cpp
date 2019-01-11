@@ -9,6 +9,7 @@ KDefectiveBase::KDefectiveBase(int n): size(n) {
     maxDis = new int[n];
     isInPC = new bool[n];
 	neiSet = new void*[n];
+	neiSet2 = new void*[n];
 	timeLimit = -1;
 	ans = 0; // 初始化答案
 }
@@ -23,6 +24,7 @@ KDefectiveBase::~KDefectiveBase() {
     delete[] maxDis;
     delete[] isInPC;
 	delete[] neiSet;
+	delete[] neiSet2;
 }
 
 bool KDefectiveBase::timeIsUp() {
@@ -149,6 +151,17 @@ void KDefectiveBase::init(void *P, void *C) {
 	for (int i = 0; i < size; i++) 
 		neiSet[i] = this -> neighborSetOf(i);
 
+	// 初始化二度邻居集合
+	for (int i = 0; i < size; i++) {
+		neiSet2[i] = this -> newSet();
+		this -> setCopyTo(neiSet[i], neiSet2[i]);
+		for (auto &to: from[i]) {
+			void *tmp = this -> setUnion(neiSet2[i], neiSet[to]);
+			this -> setCopyTo(tmp, neiSet2[i]);
+			this -> deleteSet(tmp);
+		}
+	}
+
 	// 初始化栈
 	while(!state.empty()) state.pop();
 	State s(size);
@@ -178,6 +191,7 @@ void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 }
 
 int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
+	//fprintf(stderr, "k: %d, ans: %d\n", k, ans);
 	int sz = ans + 1;
 	if (k < sz - 1) return 2;
 
@@ -232,6 +246,55 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s, int maxDiam) {
 	delete[] q;
 }
 
+void KDefectiveBase::calcNearByVerteces(void *P, void *C) {
+	if (state.top().sizeP == 0) return;
+	memset(dis, 0x3f, sizeof(int) * size);
+	void *ret = this -> newSet();
+	bool firstFlag = false;
+	for (int idx = 0; idx < size; idx++) if (this -> existsInSet(P, idx)) {
+		void *nei2 = this -> newSet();
+		this -> setCopyTo(neiSet[idx], nei2);
+		for (auto &to: from[idx]) if (isInPC[to]) {
+			void *tmp = this -> setUnion(nei2, neiSet[to]);
+			this -> setCopyTo(tmp, nei2);
+			this -> deleteSet(tmp);
+		}
+		if (!firstFlag) {
+			firstFlag = true;
+			this -> setCopyTo(nei2, ret);
+		} else {
+			void *tmp = this -> setIntersection(ret, nei2);
+			this -> setCopyTo(tmp, ret);
+			this -> deleteSet(tmp);
+		}
+	}
+	for (int i = 0; i < size; i++) if(this -> existsInSet(ret, i)) {
+		dis[i] = 2;
+	}
+	this -> deleteSet(ret);
+}
+
+void KDefectiveBase::calcNearByVertecesApprox(void *P, void *C) {
+	if (state.top().sizeP == 0) return;
+	memset(dis, 0x3f, sizeof(int) * size);
+	void *ret = this -> newSet();
+	bool firstFlag = false;
+	for (int idx = 0; idx < size; idx++) if (this -> existsInSet(P, idx)) {
+		if (!firstFlag) {
+			firstFlag = true;
+			this -> setCopyTo(neiSet2[idx], ret);
+		} else {
+			void *tmp = this -> setIntersection(ret, neiSet2[idx]);
+			this -> setCopyTo(tmp, ret);
+			this -> deleteSet(tmp);
+		}
+	}
+	for (int i = 0; i < size; i++) if(this -> existsInSet(ret, i)) {
+			dis[i] = 2;
+	}
+	this -> deleteSet(ret);
+}
+
 // 使用位运算优化了最短路, (目前是负优化)
 /*void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	void *PC = this -> setUnion(P, C);
@@ -266,7 +329,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s, int maxDiam) {
 }*/
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	state.top().diamReductionFlag = true;
-    int maxDiam = this -> calcLimOfDiam(P, C, k) + 1;
+    int maxDiam = this -> calcLimOfDiam(P, C, k);
 	//fprintf(stderr, "sz: %d, maxDiam: %d, k: %d\n", ans, maxDiam, k);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
     list <int> inC; inC.clear();
@@ -274,11 +337,22 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	bool flag = true;
 	while(flag) {
 		flag = false;
-		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
-			this -> calcDisFrom(P, C, i, maxDiam);
-			//int maxDis = 0;
-			//for (int j = 0; j < size; j++) if (dis[j] != 0x3f3f3f3f) maxDis = max(maxDis, dis[i]);
-			//for (int j = 0; j < size; j++) if (dis[j] == 0x3f3f3f3f) dis[j] = maxDis + 1;
+		//fprintf(stderr, "%d", maxDiam);
+		if (maxDiam > 2) {
+			for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
+				this -> calcDisFrom(P, C, i, maxDiam);
+				for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
+					if (dis[*it] > maxDiam) {
+						this -> removeVertexFromSetSync(C, *it, 'C');
+						isInPC[*it] = false;
+						it = inC.erase(it);
+						flag = true;
+					} else it++;
+				}
+			}
+		} else {
+			this -> calcNearByVerteces(P, C);
+			//this -> calcNearByVertecesApprox(P, C);
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
 				if (dis[*it] > maxDiam) {
 					this -> removeVertexFromSetSync(C, *it, 'C');
@@ -363,8 +437,10 @@ bool KDefectiveBase::reductionByC2P(void *P, void *C, int m) {
 	bool flag = false;
 	if (cost <= m) {
 		flag = true;
-		ans = max(ans, szP + szC);
-		fprintf(stderr, "new ans: %d\n", ans);
+		if (ans < szP + szC) {
+			ans = szP + szC;
+			fprintf(stderr, "new ans: %d\n", ans);
+		}
 	}
 	return flag;
 }
@@ -538,7 +614,7 @@ void KDefectiveBase::branch(void *P, void *C, int k, int m) {
 void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
     //if ((clock() - st)/CLOCKS_PER_SEC > 600) exit(2); // 卡时间
 	if (this -> timeIsUp()) return;
-    
+
 	void *P = this -> newSet(), *C = this -> newSet();
 	this -> setCopyTo(_P, P); this -> setCopyTo(_C, C);
 	this -> pushState();
@@ -557,11 +633,13 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 		if (this -> upperBoundByColor(P, C, m) > ans) {
 
 			count++; // 统计搜索树的节点大小
-			
+
 			// update ans
-			if (sizeOfSet(C) == 0) {
-				ans = max(ans, sizeOfSet(P));
-				fprintf(stderr, "new ans: %d\n", ans);
+			if (state.top().sizeC == 0) {
+				if (ans < state.top().sizeP) {
+					ans = state.top().sizeP;
+					fprintf(stderr, "new ans: %d\n", ans);
+				}
 			} else {
 				// branch
 				this -> branch(P, C, k, m);
@@ -578,8 +656,6 @@ int KDefectiveBase::Solve(int k) {
     count = 0;
     st = clock();
 	notFinish = false;
-	
-    //ans = 0; // init the value of the ans
 
 	// 申请空间
 	void *P = this -> newSet(), *C = this -> newSet();
@@ -592,6 +668,7 @@ int KDefectiveBase::Solve(int k) {
 	// 释放空间
 	this -> deleteSet(P); this -> deleteSet(C);
 	for (int i = 0; i < size; i++) this -> deleteSet(neiSet[i]); //init() 中初始化
+	for (int i = 0; i < size; i++) this -> deleteSet(neiSet2[i]);
 
     ed = clock();
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
