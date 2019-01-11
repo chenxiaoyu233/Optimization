@@ -39,6 +39,7 @@ void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
 	neiC = new int[n];
+	diamReductionFlag = false;
 }
 
 KDefectiveBase::State::~State() {
@@ -50,6 +51,7 @@ KDefectiveBase::State::State(const State &other) {
 	size = other.size;
 	sizeP = other.sizeP;
 	sizeC = other.sizeC;
+	diamReductionFlag = other.diamReductionFlag;
 	neiP = new int[size];
 	neiC = new int[size];
 	memcpy(neiP, other.neiP, sizeof(int) * size);
@@ -176,7 +178,7 @@ void KDefectiveBase::reductionByEdge(void *P, void *C, int m) {
 }
 
 int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
-	int sz = ans;
+	int sz = ans + 1;
 	if (k < sz - 1) return 2;
 
 	// 根据保证连通这个前提计算出的直径大小 -> 待验算
@@ -210,13 +212,15 @@ int KDefectiveBase::calcLimOfDiam(void *P, void *C, int k) {
 }*/
 
 // 和原来的版本相比, 带来了3倍的速度提升
-void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
+void KDefectiveBase::calcDisFrom(void *P, void *C, int s, int maxDiam) {
 	memset(dis, 0x3f, sizeof(int) * size);
 	int *q = new int[size], l = -1, r = -1;
 	dis[s] = 0;
 	q[++r] = s;
 	while(l != r) {
 		int tt = q[++l];
+		// 如果当前点的距离>=最大直径, 则没有必要再继续扩展下去了
+		if (dis[tt] >= maxDiam) continue;
 		for (auto to: from[tt]){
 			if (!isInPC[to]) continue;
 			if (dis[to] == 0x3f3f3f3f) {
@@ -261,6 +265,7 @@ void KDefectiveBase::calcDisFrom(void *P, void *C, int s) {
 	}
 }*/
 void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
+	state.top().diamReductionFlag = true;
     int maxDiam = this -> calcLimOfDiam(P, C, k) + 1;
 	//fprintf(stderr, "sz: %d, maxDiam: %d, k: %d\n", ans, maxDiam, k);
     for (int i = 0; i < size; i++) isInPC[i] = this -> existsInSet(P, i) | this -> existsInSet(C, i);
@@ -270,10 +275,10 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	while(flag) {
 		flag = false;
 		for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
-			this -> calcDisFrom(P, C, i);
-			int maxDis = 0;
-			for (int j = 0; j < size; j++) if (dis[j] != 0x3f3f3f3f) maxDis = max(maxDis, dis[i]);
-			for (int j = 0; j < size; j++) if (dis[j] == 0x3f3f3f3f) dis[j] = maxDis + 1;
+			this -> calcDisFrom(P, C, i, maxDiam);
+			//int maxDis = 0;
+			//for (int j = 0; j < size; j++) if (dis[j] != 0x3f3f3f3f) maxDis = max(maxDis, dis[i]);
+			//for (int j = 0; j < size; j++) if (dis[j] == 0x3f3f3f3f) dis[j] = maxDis + 1;
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
 				if (dis[*it] > maxDiam) {
 					this -> removeVertexFromSetSync(C, *it, 'C');
@@ -542,6 +547,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	this -> reductionByEdge(P, C, m);
 	this -> reductionByConnectToAll(P, C);
 	//this -> reductionWhenIsolated(P, C);
+	if (m != 0 && k < ans && state.top().sizeP != 0 && !state.top().diamReductionFlag) this -> reductionByDiam(P, C, k);
 	//this -> reductionByDiam(P, C, k);
 
 	if (state.top().sizeC + state.top().sizeP <= ans || !this -> reductionByC2P(P, C, m)) {

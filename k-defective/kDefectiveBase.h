@@ -27,6 +27,7 @@ class KDefectiveBase {
 		int size;
 		int *neiP, *neiC;
 		int sizeP, sizeC;
+		bool diamReductionFlag; // 是否已经使用过直径规约
 		
 		State(int n);
 		State(const State &other); // 复制构造函数
@@ -87,7 +88,8 @@ class KDefectiveBase {
 	virtual bool reductionByC2P(void *P, void *C, int m);
 
 	// calc the distance from idx
-	virtual void calcDisFrom(void *P, void *C, int s); 
+	virtual void calcDisFrom(void *P, void *C, int s, int maxDiam); 
+	//virtual void calcDisFrom(void *P, void *C, int s); 
 
 	// calc the number of needed edge if add idx from C to P
 	virtual int calcNeedEdge(void *P, void *C, int idx);
