@@ -312,9 +312,9 @@ void SolveWork() {
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
 	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
-		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<5000>, KDefectiveBase>(N);
-		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<5000>, KDefectiveRDS>(N);
-		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<5000>, KDefectiveSimple>(N);
+		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveBase>(N);
+		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
+		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
 	}
 
 	// 判断solver是否构造成功
