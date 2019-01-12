@@ -41,8 +41,8 @@ void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
 	neiC = new int[n];
-	diamReductionFlag = 20;
-	colorUpperBoundFlag = 20;
+	diamReductionFlag = 0x3f3f3f3f;
+	colorUpperBoundFlag = 0x3f3f3f3f;
 }
 
 KDefectiveBase::State::~State() {
@@ -344,7 +344,7 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 	while(flag) {
 		flag = false;
 		//fprintf(stderr, "%d", maxDiam);
-		if (maxDiam > 2) {
+		// if (maxDiam > 2) {
 			for (int i = 0; i < size; i++) if (this -> existsInSet(P, i)) {
 				this -> calcDisFrom(P, C, i, maxDiam);
 				for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
@@ -356,9 +356,10 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 					} else it++;
 				}
 			}
+			/*
 		} else {
-			this -> calcNearByVerteces(P, C);
-			//this -> calcNearByVertecesApprox(P, C);
+			//this -> calcNearByVerteces(P, C);
+			this -> calcNearByVertecesApprox(P, C);
 			for (list<int>::iterator it = inC.begin(); it != inC.end(); ) {
 				if (dis[*it] > maxDiam) {
 					this -> removeVertexFromSetSync(C, *it, 'C');
@@ -368,6 +369,7 @@ void KDefectiveBase::reductionByDiam(void *P, void *C, int k) {
 				} else it++;
 			}
 		}
+			*/
 	}
 }
 
