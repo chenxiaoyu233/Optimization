@@ -16,6 +16,9 @@ class KDefectiveBase {
 	vector <int> *from; // 邻接链表;
     void **neiSet; // 每个点的邻居节点集合
 	void **neiSet2; // 每个点的2度邻居(邻居的邻居)集合 (2度+1度邻居)
+	static int diamReductionFlagInit;
+	static int colorUpperBoundFlagInit;
+
 
 
 	// 用于记录是否是因为时间上限到了而结束的
@@ -121,8 +124,8 @@ class KDefectiveBase {
 	virtual int Solve(int k);
 	virtual void AddEdge(int a, int b);
 	virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
-	virtual void SetTimeLimit(int ti); // 单位: 毫秒 
-    
+	virtual void SetTimeLimit(int ti); // 单位: 毫秒
+
     // API for read the Protected var
 	// 搜索树大小
     virtual size_t GetCount();
@@ -134,7 +137,10 @@ class KDefectiveBase {
 	virtual double GetCostTime();
 	// 设置初始答案
 	virtual void SetAns(int _ans);
-
+	// 设置是否使用直径规约 (默认启用)
+	virtual void EnableDiamReduction(bool isEnable);
+	// 设置是否使用染色规约 (默认启用)
+	virtual void EnableColoringReduction(bool isEnable);
 };
 
 #endif

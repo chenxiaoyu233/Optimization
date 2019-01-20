@@ -8,7 +8,8 @@ using namespace std;
 #include "kDefective.h"
 
 // 命令行参数解析工具
-#include <unistd.h> 
+#include <unistd.h>
+#include <getopt.h>
 
 // 全局参数存储
 struct globalArgs_t {
@@ -25,6 +26,8 @@ struct globalArgs_t {
 	string algoType;      // -a 需要运行的算法类型
 	string dataStructure; // -D 使用的数据结构的类型
 	int k;                // -k 设置 k-defective 中的 k 值
+	bool disableDiamReduction;  // --noDiam
+	bool disableColorReduction; // --noColor
 
 	/* 生成数据类操作 */
 	int vertexNum;        // -n 图中点的数量
@@ -43,6 +46,10 @@ struct globalArgs_t {
 } globalArgs;
 
 static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:M:";
+static const option longOpts[] = {
+	{"noDiam", no_argument, NULL, 0},
+	{"noColor", no_argument, NULL, 0}
+};
 
 void InitGlobalArgs() {
 	globalArgs.readFileName = "";
@@ -55,6 +62,8 @@ void InitGlobalArgs() {
 	globalArgs.algoType = "";
 	globalArgs.dataStructure = "";
 	globalArgs.k = -1;
+	globalArgs.disableDiamReduction = false;
+	globalArgs.disableColorReduction = false;
 
 	globalArgs.vertexNum = 0;
 	globalArgs.edgeDensity = 0.0;
@@ -300,7 +309,7 @@ void SolveWork() {
 
 		// 更新当前答案
 		globalArgs.maxKDefective = preworker -> GetAns();
-		
+
         // 回收内存
 		delete preworker;
 		fprintf(stderr, "finish prework\n");
@@ -322,6 +331,10 @@ void SolveWork() {
 		puts("can not initialize the solver");
 		return;
 	}
+
+	// 设置是否使用直径和染色规约
+	solver -> EnableDiamReduction(!globalArgs.disableDiamReduction);
+	solver -> EnableColoringReduction(!globalArgs.disableColorReduction);
 
 	// 设置答案下界
 	solver -> SetAns(globalArgs.maxKDefective);
@@ -382,7 +395,8 @@ int main(int argc, char** argv) {
 
 	// 从命令行获取参数
 	char opt;
-	while ( (opt = getopt( argc, argv, optString )) != -1 ) {
+	int longIndex;
+	while ( (opt = getopt_long( argc, argv, optString, longOpts, &longIndex)) != -1 ) {
 		switch (opt) {
 			case 'f':
 				globalArgs.readFileName = globalArgs.writeFileName = string(optarg);
@@ -439,9 +453,18 @@ int main(int argc, char** argv) {
 			case 'M':
 				globalArgs.maxKDefective = atoi(optarg);
 				break;
+
+			case 0:
+				if (strcmp("noDiam", longOpts[longIndex].name) == 0) {
+					globalArgs.disableDiamReduction = true;
+				} else if(strcmp("noColor", longOpts[longIndex].name) == 0) {
+					globalArgs.disableColorReduction = true;
+				}
 		}
 	}
 
+	if (globalArgs.disableDiamReduction) fprintf(stderr, "disable diam\n");
+	if (globalArgs.disableColorReduction) fprintf(stderr, "disable color\n");
 	// 开始工作
 	Work();
 

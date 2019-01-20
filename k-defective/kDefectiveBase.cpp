@@ -1,5 +1,9 @@
 #include "kDefectiveBase.h"
 
+// 默认执行染色+直径规约
+int KDefectiveBase::diamReductionFlagInit = 0x3f3f3f3f;
+int KDefectiveBase::colorUpperBoundFlagInit = 0x3f3f3f3f;
+
 KDefectiveBase::KDefectiveBase(int n): size(n) {
 	from = new vector<int>[n];
 	for (int i = 0; i < size; i++) {
@@ -41,8 +45,8 @@ void KDefectiveBase::SetTimeLimit(int ti) { timeLimit = ti; }
 KDefectiveBase::State::State(int n):size(n) {
 	neiP = new int[n];
 	neiC = new int[n];
-	diamReductionFlag = 0x3f3f3f3f;
-	colorUpperBoundFlag = 0x3f3f3f3f;
+	diamReductionFlag = KDefectiveBase::diamReductionFlagInit;
+	colorUpperBoundFlag = KDefectiveBase::colorUpperBoundFlagInit;
 }
 
 KDefectiveBase::State::~State() {
@@ -104,6 +108,13 @@ bool KDefectiveBase::GetNotFinishFlag() {
 
 int KDefectiveBase::GetAns() {
 	return ans;
+}
+
+void KDefectiveBase::EnableDiamReduction(bool isEnable) {
+	diamReductionFlagInit = isEnable ? 0x3f3f3f3f : 0;
+}
+void KDefectiveBase::EnableColoringReduction(bool isEnable) {
+	colorUpperBoundFlagInit = isEnable ? 0x3f3f3f3f : 0;
 }
 
 double KDefectiveBase::GetCostTime() {
