@@ -16,6 +16,7 @@ else (NDEBUG)
 endif (NDEBUG)
 
 set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+#set (CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
 
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
