@@ -297,7 +297,9 @@ void SolveWork() {
 	}
 
 	// 预处理图
+	int BN = N; // 记录预处理之前N的取值
 	if (globalArgs.needPrework) {
+		fprintf(stderr, "number of vertex before prework: %d\n", N);
 		preworker = new STLSetImplement<set<int>, PreWorker>(N);
 		preworker -> SetAns(globalArgs.maxKDefective);
 		preworker -> AddEdgeByVector(edges);
@@ -313,6 +315,7 @@ void SolveWork() {
         // 回收内存
 		delete preworker;
 		fprintf(stderr, "finish prework\n");
+		fprintf(stderr, "number of vertex after prework: %d\n", N);
 	}
 
 	// 创建求解器
@@ -350,9 +353,11 @@ void SolveWork() {
 
 	// 输出答案
 	printf("ans: %d\n", solver -> GetAns());
-	printf("size of search tree: %lu\n", solver -> GetCount());
-	printf("cost of time: %lfs\n", solver -> GetCostTime());
-	printf("time out flag: %d\n", solver -> GetNotFinishFlag());
+	printf("size-of-search-tree: %lu\n", solver -> GetCount());
+	printf("cost-of-time: %lfs\n", solver -> GetCostTime());
+	printf("time-out-flag: %d\n", solver -> GetNotFinishFlag());
+	printf("number-of-vertex-before-prework: %d\n", BN);
+	printf("number-of-vertex-after-prework: %d\n", N);
 
 	// 回收内存
 	delete solver;
