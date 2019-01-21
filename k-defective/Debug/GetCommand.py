@@ -13,7 +13,7 @@ kList = [1, 4]
 algoList = ['Base', 'RDS', 'Simple']
 
 # 时间上限
-timeLimit = 7200 # = 2 * 3600
+timeLimit = 18000 # = 2 * 3600
 
 # 数据集的位置
 dataDir = "./graph"
@@ -25,7 +25,7 @@ targetDir = "./result"
 execDir = "./KDefective"
 
 # 命令的模板
-cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p > {8}" # @todo
+cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p {8} > {9}" # @todo
 
 # Result:
 command = ['#!/bin/bash']
@@ -43,12 +43,13 @@ def FindNInDataFile(data):
                     return int(s)
 
 
-def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStructure):
+def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStructure, Flags):
     global execDir, timeLimit
     command.append(
         cmd.format(
             execDir, algorithm, timeLimit, dataStructure, k, dataFile,
             fileType, cliqueSize,
+            Flags,
             ResultFile(
                 resultDir,
                 dataFile,
@@ -63,7 +64,6 @@ def ResultFile(resultDir, dataFile, algorithm, k):
         resultDir, 
         '-'.join([os.path.basename(dataFile), algorithm, str(k)])
     )
-
 
 def main(argv = sys.argv):
     fin = open("TestList_10th.txt", "r")
@@ -86,7 +86,7 @@ def main(argv = sys.argv):
         # 生成指令
         for t in kList:
             for algo in algoList:
-                AddCommand(algo, t, dataFile, resultDir, item[1], item[2], item[3])
+                AddCommand(algo, t, dataFile, resultDir, item[1], item[2], item[3], argv[1])
     
     # 将指令输出
     for line in command:
