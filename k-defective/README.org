@@ -1,0 +1,89 @@
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+* KDefective 可执行文件命令行参数
+** 解析参数所使用的代码
+#+BEGIN_SRC c++ 
+// 全局参数存储
+struct globalArgs_t {
+	/* 读写文件相关信息 */
+	string readFileName;  // -r 读文件名
+	string writeFileName; // -w 写文件名
+	string logFileName;   // -l 日志文件名
+
+	/* 操作类型 */
+	string op;            // -O 需要运行那种类型的操作
+
+	/* 求解类操作 */
+	bool needPrework;     // -p 是否需要对图进行预处理
+	int timeLimit;        // -t 算法运行的时间上限
+	string algoType;      // -a 需要运行的算法类型
+	string dataStructure; // -D 使用的数据结构的类型
+	int k;                // -k 设置 k-defective 中的 k 值
+	bool disableDiamReduction;  // --noDiam
+	bool disableColorReduction; // --noColor
+
+	/* 生成数据类操作 */
+	int vertexNum;        // -n 图中点的数量
+	float edgeDensity;    // -d 图中边出现的密度
+
+	/* 对比类操作 */
+
+	/* 求助类操作 */
+	bool needHelp;        // -h 表示需要帮助
+
+	/* 输入图的文件类型 */
+	string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
+
+	/* 最大团的大小 */
+	int maxKDefective;    // -M 设置图的最大团的大小
+} globalArgs;
+#+END_SRC
+** 各个option对应的意思和用法
+   | option    | meaning/type                                        | parameter                 |
+   |-----------+-----------------------------------------------------+---------------------------|
+   | -r        | input file (data file)                              | input file's name (path)  |
+   | -w        | output file (graph file)                            | output file's name (path) |
+   | -l        | log file (answer file)                              | answer file's name (path) |
+   | -O        | Operator Type                                       | solve/generate/compare    |
+   | -p        | prework flag                                        |                           |
+   | -t        | time limit for algorithm                            | time in second            |
+   | -a        | Algorithm Type                                      | Base/RDS/Simple/IP        |
+   | -D        | DataStructure used by the algorithm                 | Set/Bitset                |
+   | -k        | k in k-defective                                    | an integer                |
+   | --noDiam  | Kill Diameter Reduction in Base algo                |                           |
+   | --noColor | Kill Color Reduction in Base algo                   |                           |
+   | -n        | number of vertex in the random graph                | an integer                |
+   | -d        | the dense of the edges in random graph              | an float                  |
+   | -h        | help                                                | (not implement yet)       |
+   | -G        | the type of graph the Program Read                  | clq/graph/SNAP            |
+   | -M        | set the maximum size of clique in the graph by hand | an integer                |
+
+* Integer Programming Environment AMPL
+  我多次和IBM官方联系, 他们告诉我说没有通过美国的软件出口审核.
+  这导致我一直下载不了CPLEX, 我的工作一直无法开展.
+  不过, 我在网上发现了AMPL这个统一的建模语言. 据说是贝尔实验室发明的.
+  用这个语言挺方便的, 而且它也提供了c++的接口. 
+  并且它自己只是一个建模的前端而已, 可以支持一大帮求解器(CPLEX(商业求解器), CBC(开源求解器)等).
+** AMPL C++ API USAGE
+   AMPL C++ API 可以在这个链接下载到: [[https://ampl.com/products/api/][下载地址]].
+   下载解压好之后是一个文件夹: amplapi/
+   这个文件夹中比较重要的两个子文件夹是: amplapi/lib, amplapi/include
+   在编译的时候, 我们需要通过一些手段来链接AMPL提供的API
+#+BEGIN_SRC cmake
+# 配置AMPL库
+SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) #将编译时链接的动态库添加到RPATH
+include_directories ("${CMAKE_SOURCE_DIR}/amplapi/include/")   #添加存放都文件的目录
+link_directories ("${CMAKE_SOURCE_DIR}/amplapi/lib") #添加链接库的路径(用来找库)
+set (CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/amplapi/lib") #设置编译目标的RPATH
+#+END_SRC
+	这个RPATH是指: 可执行文件在运行时可能回去请求动态链接库. 这个时候除了系统默认存放动态链接库的位置,
+	我们还可以在编译的时候, 额外指定一些位置. 如果不指定RPATH的话, 也可以通过指定$LD_LIBRARY_PATH
+	这个环境变量来指定查找动态链接库的位置.
+#+BEGIN_SRC cmake
+target_link_libraries (KDefective ampl)
+#+END_SRC 
+	最后, 通过这一句指令, 我们可以将ampl库连接到KDfective这个可执行文件上.
+	使用AMPL提供的接口的时候, 需要在cpp/h文件中包含相对应的头文件:
+#+BEGIN_SRC c++
+#include "ampl/ampl.h" // AMPL建模语言API
+#+END_SRC
+	目前在集群上能否使用这个接口还存疑, 我还没有进行过测试.
