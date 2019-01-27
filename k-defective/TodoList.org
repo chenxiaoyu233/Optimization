@@ -1,42 +1,74 @@
-* TODO 需要完成的实验 [0%]
+* TODO 需要完成的实验 [71%]
   SCHEDULED: <2019-01-20 Sun>
-** 裸分支 + 直径 [50%]
+** DONE 裸分支 + 直径 [100%]
+   CLOSED: [2019-01-27 Sun 21:46]
 *** DONE 实现 
 	CLOSED: [2019-01-21 Mon 19:26]
 *** DONE 测试
 	CLOSED: [2019-01-21 Mon 19:26]
-*** TODO 部署 + 运行
-*** TODO 制表
-** TODO 裸分支 + 染色 [50%]
+*** DONE 部署 + 运行
+	CLOSED: [2019-01-27 Sun 21:45]
+	- [X] start
+	- [X] waiting
+*** DONE 制表
+	CLOSED: [2019-01-27 Sun 21:45]
+** DONE 裸分支 + 染色 [100%]
+   CLOSED: [2019-01-27 Sun 21:46]
 *** DONE 实现
 	CLOSED: [2019-01-21 Mon 19:26]
 *** DONE 测试
 	CLOSED: [2019-01-21 Mon 19:26]
-*** TODO 部署 + 运行
-*** TODO 制表
-** TODO 完整的分支算法 [50%]
+*** DONE 部署 + 运行
+	CLOSED: [2019-01-27 Sun 21:45]
+	- [X] start
+	- [X] waiting
+*** DONE 制表
+	CLOSED: [2019-01-27 Sun 21:45]
+** DONE 完整的分支算法 [100%]
+   CLOSED: [2019-01-27 Sun 21:46]
 *** DONE 实现
 	CLOSED: [2019-01-21 Mon 19:26]
 *** DONE 测试
 	CLOSED: [2019-01-21 Mon 19:26]
-*** TODO 部署 + 运行
-*** TODO 制表
-** TODO 预处理的效果 [50%]
+*** DONE 部署 + 运行
+	CLOSED: [2019-01-27 Sun 21:45]
+	- [X] start
+	- [X] waiting
+*** DONE 制表
+	CLOSED: [2019-01-27 Sun 21:45]
+** DONE 预处理的效果 [100%]
+   CLOSED: [2019-01-27 Sun 21:46]
+*** DONE 实现
+	CLOSED: [2019-01-21 Mon 19:26]
+	:LOGBOOK:
+	CLOCK: [2019-01-23 Wed 11:15]--[2019-01-23 Wed 11:40] =>  0:25
+	:END:
+*** DONE 测试
+	CLOSED: [2019-01-21 Mon 19:26]
+*** DONE 部署 + 运行
+	CLOSED: [2019-01-27 Sun 21:45]
+	- [X] start
+	- [X] waiting
+*** DONE 制表
+	CLOSED: [2019-01-27 Sun 21:45]
+** DONE RDS [100%]
+   CLOSED: [2019-01-27 Sun 21:46]
 *** DONE 实现
 	CLOSED: [2019-01-21 Mon 19:26]
 *** DONE 测试
 	CLOSED: [2019-01-21 Mon 19:26]
-*** TODO 部署 + 运行
-*** TODO 制表
-** TODO RDS [50%]
-*** DONE 实现
-	CLOSED: [2019-01-21 Mon 19:26]
-*** DONE 测试
-	CLOSED: [2019-01-21 Mon 19:26]
-*** TODO 部署 + 运行
-*** TODO 制表
+*** DONE 部署 + 运行
+	CLOSED: [2019-01-27 Sun 21:45]
+	- [X] start
+	- [X] waiting
+*** DONE 制表
+	CLOSED: [2019-01-27 Sun 21:45]
 ** TODO cplex 线性规划求解 [0%]
-*** TODO 文献阅读
+*** TODO 文献阅读 [50%]
+	- [X] 了解k-defective求解的线性规划模型
+	- [X] 在原来代码的基础上搭建AMPL环境
+	- [ ] 学习AMPL建模语言
+	- [ ] 通过AMPL编写对应的模型
 *** TODO 实现
 *** TODO 测试
 *** TODO 部署 + 运行

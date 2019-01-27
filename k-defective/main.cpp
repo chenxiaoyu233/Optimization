@@ -16,6 +16,7 @@ struct globalArgs_t {
 	/* 读写文件相关信息 */
 	string readFileName;  // -r 读文件名
 	string writeFileName; // -w 写文件名
+	string logFileName;   // -l 日志文件名
 
 	/* 操作类型 */
 	string op;            // -O 需要运行那种类型的操作
@@ -45,7 +46,7 @@ struct globalArgs_t {
 	int maxKDefective;    // -M 设置图的最大团的大小
 } globalArgs;
 
-static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:M:";
+static const char *optString = "f:r:w:O:pt:a:D:n:d:hk:G:M:l:";
 static const option longOpts[] = {
 	{"noDiam", no_argument, NULL, 0},
 	{"noColor", no_argument, NULL, 0}
@@ -54,6 +55,7 @@ static const option longOpts[] = {
 void InitGlobalArgs() {
 	globalArgs.readFileName = "";
 	globalArgs.writeFileName = "";
+	globalArgs.logFileName = "";
 
 	globalArgs.op = "";
 
@@ -323,10 +325,12 @@ void SolveWork() {
 		if (globalArgs.algoType == "Base") solver = new STLSetImplement<set<int>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
+		else if (globalArgs.algoType == "IP") solver = new STLSetImplement<set<int>, KDefectiveIP>(N);
 	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
 		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
+		else if (globalArgs.algoType == "IP") solver = new BitSetImplement<bitset<16000>, KDefectiveIP>(N);
 	}
 
 	// 判断solver是否构造成功
@@ -351,13 +355,25 @@ void SolveWork() {
 	// 求解
 	solver -> Solve(globalArgs.k);
 
-	// 输出答案
+	// 输出答案到标准输出
 	printf("ans: %d\n", solver -> GetAns());
 	printf("size-of-search-tree: %lu\n", solver -> GetCount());
 	printf("cost-of-time: %lfs\n", solver -> GetCostTime());
 	printf("time-out-flag: %d\n", solver -> GetNotFinishFlag());
 	printf("number-of-vertex-before-prework: %d\n", BN);
 	printf("number-of-vertex-after-prework: %d\n", N);
+
+	// 输出答案到指定文件
+	if (globalArgs.logFileName != "") {
+		FILE *log = fopen(globalArgs.logFileName.c_str(), "w"):
+		fprintf(log, "ans: %d\n", solver -> GetAns());
+		fprintf(log, "size-of-search-tree: %lu\n", solver -> GetCount());
+		fprintf(log, "cost-of-time: %lfs\n", solver -> GetCostTime());
+		fprintf(log, "time-out-flag: %d\n", solver -> GetNotFinishFlag());
+		fprintf(log, "number-of-vertex-before-prework: %d\n", BN);
+		fprintf(log, "number-of-vertex-after-prework: %d\n", N);
+		fclose(log);
+	}
 
 	// 回收内存
 	delete solver;
@@ -457,6 +473,10 @@ int main(int argc, char** argv) {
 
 			case 'M':
 				globalArgs.maxKDefective = atoi(optarg);
+				break;
+
+			case 'l':
+				globalArgs.logFileName = string(optarg);
 				break;
 
 			case 0:
