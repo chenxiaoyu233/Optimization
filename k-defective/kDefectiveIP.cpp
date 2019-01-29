@@ -21,6 +21,7 @@ KDefectiveIP::~KDefectiveIP() {
 }
 
 void KDefectiveIP::SetTimeLimit(int ti) {
+    KDefectiveBase::SetTimeLimit(ti); // 设置父类的时间限制
 	if (ti != -1) parm.tm_lim = ti * 1000;
 }
 
@@ -29,7 +30,7 @@ void KDefectiveIP::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 	KDefectiveBase::AddEdgeByVector(edges);
 	this -> edges = edges;
 	edgePreprocessingForGLPK();
-	int total = (this -> edges.size() + 1) * (size + this -> edges.size()) + 1;
+	total = (this -> edges.size() + 1) * (size + this -> edges.size()) + 1;
     ia = new int[total];
     ja = new int[total];
     mat = new double[total];
@@ -81,21 +82,29 @@ void KDefectiveIP::assignData(int _k) {
 
 void KDefectiveIP::addCoefficient(int row, int col, double val) {
 	++cnt;
-	ia[cnt] = row;
-	ja[cnt] = col;
-	mat[cnt] = val;
-	//cerr << cnt << " " << row << " " << col << " " << val << endl;
+    if (cnt <= total) {
+        ia[cnt] = row;
+        ja[cnt] = col;
+        mat[cnt] = val;
+    } else {
+        cerr << total << " " << cnt << " " << row << " " << col << " " << val << endl;
+        exit(0);
+    }
 }
 
 void KDefectiveIP::buildModel(int k) {
 	glp_set_obj_dir(lp, GLP_MAX); // 设置问题为最大化问题
 	// 添加列
 	for (int i = 0; i < size; i++) {  // x {V} binary
+        if (timeIsUp()) return;
+        //cerr << timeLimit << " " << clock() - st << endl;
 		int idx = glp_add_cols(lp, 1);
 		glp_set_col_kind(lp, idx, GLP_BV);
 		glp_set_obj_coef(lp, idx, 1);
 	}
 	for (size_t i = 0; i < edges.size(); i++) {
+        if (timeIsUp()) return;
+        //cerr << timeLimit << " " << clock() - st << endl;
 		int idx = glp_add_cols(lp, 1);
 		glp_set_col_kind(lp, idx, GLP_IV);
 		glp_set_col_bnds(lp, idx, GLP_LO, 0, 0); // 0 <= Z[i, j]
@@ -106,6 +115,8 @@ void KDefectiveIP::buildModel(int k) {
 		int idx = glp_add_rows(lp, 1);
 		glp_set_row_bnds(lp, idx, GLP_LO, -1, 0);
 		for (int j = 0; j < size + (int)edges.size(); j++) {
+            if (timeIsUp()) return;
+            //cerr << timeLimit << " " << clock() - st << endl;
 			bool isZ = j >= size; 
 			int whe = isZ ? j - size + 1 : j + 1;
 			double val = 0;
@@ -117,6 +128,8 @@ void KDefectiveIP::buildModel(int k) {
 	int idx = glp_add_rows(lp, 1);
 	glp_set_row_bnds(lp, idx, GLP_UP, 0, k);
 	for (int i = 0; i < size + (int)edges.size(); i++) {
+        if (timeIsUp()) return;
+        //cerr << timeLimit << " " << clock() - st << endl;
 		addCoefficient(idx, i+1, double(i >= size));
 	}
 	glp_load_matrix(lp, cnt, ia, ja, mat);
@@ -132,12 +145,13 @@ int KDefectiveIP::Solve(int k) {
 	ampl -> solve();
 	ans = ampl -> getObjective("Maximum_KDefective").value();
 	*/
-
 	buildModel(k);
-	int flag = glp_intopt(lp, &parm);
-	//notFinish = (flag == GLP_ETMLIM);
-	notFinish = flag != 0;
-	ans = glp_mip_obj_val(lp);
+    if (!timeIsUp()) {
+        int flag = glp_intopt(lp, &parm);
+        //notFinish = (flag == GLP_ETMLIM);
+        notFinish = flag != 0;
+        ans = glp_mip_obj_val(lp);
+    }
 
 	/* Debug
 	for (int i = 1; i <= 10; i++) {

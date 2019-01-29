@@ -25,8 +25,8 @@ set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 #set (CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/amplapi/lib")
 
 # 配置glpk库
-include_directories ("/usr/local/Cellar/glpk/4.65/include")
-link_directories ("/usr/local/Cellar/glpk/4.65/lib")
+include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
+link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
