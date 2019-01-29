@@ -8,6 +8,8 @@ KDefectiveIP::KDefectiveIP(int n): KDefectiveBase(n) {
 	ampl -> read("../IPmodel/kdefective.mod");
 	*/
 	lp = glp_create_prob();
+	glp_init_iocp(&parm);
+	parm.presolve = GLP_ON;
 	cnt = 0;
 }
 
@@ -16,6 +18,10 @@ KDefectiveIP::~KDefectiveIP() {
 	delete[] ia;
 	delete[] ja;
 	delete[] mat;
+}
+
+void KDefectiveIP::SetTimeLimit(int ti) {
+	if (ti != -1) parm.tm_lim = ti * 1000;
 }
 
 void KDefectiveIP::AddEdgeByVector(const vector<pair<int, int> > &edges) {
@@ -128,10 +134,9 @@ int KDefectiveIP::Solve(int k) {
 	*/
 
 	buildModel(k);
-	glp_iocp parm;
-	glp_init_iocp(&parm);
-	parm.presolve = GLP_ON;
-	glp_intopt(lp, &parm);
+	int flag = glp_intopt(lp, &parm);
+	//notFinish = (flag == GLP_ETMLIM);
+	notFinish = flag != 0;
 	ans = glp_mip_obj_val(lp);
 
 	/* Debug

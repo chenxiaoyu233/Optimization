@@ -13,6 +13,7 @@ class KDefectiveIP: public KDefectiveBase {
 	//void assignData(int k);
 
 	glp_prob *lp;
+	glp_iocp parm;
 	int *ia, *ja;
 	double *mat;
 	int cnt;
@@ -28,6 +29,7 @@ class KDefectiveIP: public KDefectiveBase {
 	KDefectiveIP(int n);
 	~KDefectiveIP();
 	virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
+	virtual void SetTimeLimit(int ti);
 	virtual int Solve(int k);
 };
 
