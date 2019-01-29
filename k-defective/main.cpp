@@ -365,7 +365,7 @@ void SolveWork() {
 
 	// 输出答案到指定文件
 	if (globalArgs.logFileName != "") {
-		FILE *log = fopen(globalArgs.logFileName.c_str(), "w"):
+		FILE *log = fopen(globalArgs.logFileName.c_str(), "w");
 		fprintf(log, "ans: %d\n", solver -> GetAns());
 		fprintf(log, "size-of-search-tree: %lu\n", solver -> GetCount());
 		fprintf(log, "cost-of-time: %lfs\n", solver -> GetCostTime());
