@@ -27,7 +27,12 @@ class Row:
         self.dic['k'] = keys[-1]
 
     def __init__(self, filename, outerDic = None):
-        self.dic = {}
+        self.dic = {'ans': 'X',
+                    'size of search tree': 'X',
+                    'cost of time': 'X',
+                    'time out flag': 'X',
+                    'number of vertex before prework': 'X',
+                    'number of vertex after prework': 'X'}
         self.__readFile(filename)
         self.__parseFileName(filename)
         # 优先使用参数传递的键值对
@@ -116,17 +121,27 @@ class FormGenerator:
         algorithms = self.DB.ValueSetOfKey('algorithm')
         for datafile in datafiles:
             print("\\hline")
-            print("\\multirow{{{}}}{{*}}{{{}}}".format(len(algorithms), datafile))
+            print("\\multirow{{{}}}{{*}}{{{}}}".format(len(algorithms), datafile), end = " ")
+            print("& \\multirow{{{}}}{{*}}{{{}}}".format(len(algorithms), 
+                self.DB.Find({'algorithm': 'Base', 'datafile': datafile}).Rows[0].dic['number of vertex before prework']), end = " ")
+            print("& \\multirow{{{}}}{{*}}{{{}}}".format(len(algorithms), 
+                self.DB.Find({'algorithm': 'Base', 'datafile': datafile}).Rows[0].dic['number of vertex after prework']))
+            formatter = "& {}"
             for algorithm in algorithms:
-                print("& {}".format(algorithm), end = " ")
+                print(formatter.format(algorithm), end = " ")
                 DB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile}).Sort(['k'], '<')
-                for row in DB.Rows:
-                    #print(row.dic['k'], end = " ")
-                    print("& " + row.dic['ans'], end = " ")
-                    print("& " + row.dic['size of search tree'], end = " ")
-                    print("& " + row.dic['cost of time'], end = " ")
-                    print("& " + row.dic['time out flag'], end = " ")
+                if len(DB.Rows) == 4:
+                    for row in DB.Rows:
+                        #print(row.dic['k'], end = " ")
+                        print("& " + row.dic['ans'], end = " ")
+                        print("& " + row.dic['size of search tree'], end = " ")
+                        print("& " + row.dic['cost of time'], end = " ")
+                        print("& " + row.dic['time out flag'], end = " ")
+                else:
+                    for i in range(4):
+                        print("& X & X & X & X", end = " ")
                 print("\\\\") 
+                formatter = "& & & {}"
         f = open('tail.tex', 'r')
         print(f.read())
         f.close()
@@ -140,6 +155,7 @@ def main():
     form.AddDirectory('Base-noColor/result/', {'algorithm': 'Base-noColor'})
     form.AddDirectory('Base-noDiam/result/', {'algorithm': 'Base-noDiam'})
     form.AddDirectory('RDS/result/')
+    form.AddDirectory('Ip')
 
     # 输出
     form.PrintForm()
