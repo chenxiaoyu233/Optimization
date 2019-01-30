@@ -16,7 +16,7 @@ class KDefectiveIP: public KDefectiveBase {
 	glp_iocp parm;
 	int *ia, *ja;
 	double *mat; // 系数矩阵
-	int cnt;   // 当前填入系数矩阵的元素的编号
+	size_t cnt;   // 当前填入系数矩阵的元素的编号
     size_t total; // 系数矩阵中元素的个数
 	// GLPK 库所有的元素从1开始编号
 	// 为了迎合这个特点, 这里将所有的点进行了重新编号

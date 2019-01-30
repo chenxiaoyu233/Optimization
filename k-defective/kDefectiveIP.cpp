@@ -82,7 +82,7 @@ void KDefectiveIP::assignData(int _k) {
 
 void KDefectiveIP::addCoefficient(int row, int col, double val) {
 	++cnt;
-    if (cnt <= total) {
+    if (0 <= cnt && cnt <= total) {
         ia[cnt] = row;
         ja[cnt] = col;
         mat[cnt] = val;
