@@ -1,42 +1,42 @@
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
 * KDefective 可执行文件命令行参数
 ** 解析参数所使用的代码
-#+BEGIN_SRC c++ 
-// 全局参数存储
-struct globalArgs_t {
-	/* 读写文件相关信息 */
-	string readFileName;  // -r 读文件名
-	string writeFileName; // -w 写文件名
-	string logFileName;   // -l 日志文件名
+	#+BEGIN_SRC c++ 
+	// 全局参数存储
+	struct globalArgs_t {
+		/* 读写文件相关信息 */
+		string readFileName;  // -r 读文件名
+		string writeFileName; // -w 写文件名
+		string logFileName;   // -l 日志文件名
 
-	/* 操作类型 */
-	string op;            // -O 需要运行那种类型的操作
+		/* 操作类型 */
+		string op;            // -O 需要运行那种类型的操作
 
-	/* 求解类操作 */
-	bool needPrework;     // -p 是否需要对图进行预处理
-	int timeLimit;        // -t 算法运行的时间上限
-	string algoType;      // -a 需要运行的算法类型
-	string dataStructure; // -D 使用的数据结构的类型
-	int k;                // -k 设置 k-defective 中的 k 值
-	bool disableDiamReduction;  // --noDiam
-	bool disableColorReduction; // --noColor
+		/* 求解类操作 */
+		bool needPrework;     // -p 是否需要对图进行预处理
+		int timeLimit;        // -t 算法运行的时间上限
+		string algoType;      // -a 需要运行的算法类型
+		string dataStructure; // -D 使用的数据结构的类型
+		int k;                // -k 设置 k-defective 中的 k 值
+		bool disableDiamReduction;  // --noDiam
+		bool disableColorReduction; // --noColor
 
-	/* 生成数据类操作 */
-	int vertexNum;        // -n 图中点的数量
-	float edgeDensity;    // -d 图中边出现的密度
+		/* 生成数据类操作 */
+		int vertexNum;        // -n 图中点的数量
+		float edgeDensity;    // -d 图中边出现的密度
 
-	/* 对比类操作 */
+		/* 对比类操作 */
 
-	/* 求助类操作 */
-	bool needHelp;        // -h 表示需要帮助
+		/* 求助类操作 */
+		bool needHelp;        // -h 表示需要帮助
 
-	/* 输入图的文件类型 */
-	string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
+		/* 输入图的文件类型 */
+		string graphFileType; // -G 设置图文件的类型 (.clq, .graph)
 
-	/* 最大团的大小 */
-	int maxKDefective;    // -M 设置图的最大团的大小
-} globalArgs;
-#+END_SRC
+		/* 最大团的大小 */
+		int maxKDefective;    // -M 设置图的最大团的大小
+	} globalArgs;
+	#+END_SRC
 ** 各个option对应的意思和用法
    | option    | meaning/type                                        | parameter                 |
    |-----------+-----------------------------------------------------+---------------------------|
@@ -63,27 +63,61 @@ struct globalArgs_t {
   不过, 我在网上发现了AMPL这个统一的建模语言. 据说是贝尔实验室发明的.
   用这个语言挺方便的, 而且它也提供了c++的接口. 
   并且它自己只是一个建模的前端而已, 可以支持一大帮求解器(CPLEX(商业求解器), CBC(开源求解器)等).
-** AMPL C++ API USAGE
+** AMPL C++ API USAG
    AMPL C++ API 可以在这个链接下载到: [[https://ampl.com/products/api/][下载地址]].
    下载解压好之后是一个文件夹: amplapi/
    这个文件夹中比较重要的两个子文件夹是: amplapi/lib, amplapi/include
    在编译的时候, 我们需要通过一些手段来链接AMPL提供的API
-#+BEGIN_SRC cmake
-# 配置AMPL库
-SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) #将编译时链接的动态库添加到RPATH
-include_directories ("${CMAKE_SOURCE_DIR}/amplapi/include/")   #添加存放都文件的目录
-link_directories ("${CMAKE_SOURCE_DIR}/amplapi/lib") #添加链接库的路径(用来找库)
-set (CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/amplapi/lib") #设置编译目标的RPATH
-#+END_SRC
+	#+BEGIN_SRC cmake
+	# 配置AMPL库
+	SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) #将编译时链接的动态库添加到RPATH
+	include_directories ("${CMAKE_SOURCE_DIR}/amplapi/include/")   #添加存放都文件的目录
+	link_directories ("${CMAKE_SOURCE_DIR}/amplapi/lib") #添加链接库的路径(用来找库)
+	set (CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/amplapi/lib") #设置编译目标的RPATH
+	#+END_SRC
 	这个RPATH是指: 可执行文件在运行时可能回去请求动态链接库. 这个时候除了系统默认存放动态链接库的位置,
 	我们还可以在编译的时候, 额外指定一些位置. 如果不指定RPATH的话, 也可以通过指定$LD_LIBRARY_PATH
 	这个环境变量来指定查找动态链接库的位置.
-#+BEGIN_SRC cmake
-target_link_libraries (KDefective ampl)
-#+END_SRC 
+	#+BEGIN_SRC cmake
+	target_link_libraries (KDefective ampl)
+	#+END_SRC 
 	最后, 通过这一句指令, 我们可以将ampl库连接到KDfective这个可执行文件上.
 	使用AMPL提供的接口的时候, 需要在cpp/h文件中包含相对应的头文件:
-#+BEGIN_SRC c++
-#include "ampl/ampl.h" // AMPL建模语言API
-#+END_SRC
+	#+BEGIN_SRC c++
+	#include "ampl/ampl.h" // AMPL建模语言API
+	#+END_SRC
 	目前在集群上能否使用这个接口还存疑, 我还没有进行过测试.
+
+* Integer Programming Environment GLPK
+  当我实现了AMPL/api实现了整数规划模型之后, 我发现其实这个东西也是收费的.
+  免费版能够求解的变量规模是受限制的. 而我们的数据集中可能会产生上百亿个变量,
+  所以使用AMPL变得不太现实了. 于是我尝试了一下GNU旗下的GLPK这个库.
+** GLPK C++ API USAGE
+	glpk C++ API 可以在这个地址下载到: [[https://www.gnu.org/software/glpk/][下载地址]]
+	下载好之后, 会得到一个压缩包, *glpk-4.65.tar.gz*. 
+	可以运行命令来解压并编译:
+	#+BEGIN_SRC bash
+	tar -zxvf glpk-4.65.tar.gz
+	mv glpk-4.65.tar.gz glpk
+	bash MyInstall.sh
+	#+END_SRC
+	编译完成之后, 会在glpk/下生成glpk/lib和glpk/include. 可以在CMakeList.txt中使用相应的方法来进行链接
+	#+BEGIN_SRC cmake
+	# 配置glpk库
+	include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
+	link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
+	#+END_SRC
+	然后在生成了可执行文件之后加上
+	#+BEGIN_SRC cmake
+	target_link_libraries (KDefective glpk)
+	#+END_SRC
+*** 目前存在的问题
+	1) 目前已知在有些用例上, 在我本机和集群上, 同样代码编译出的程序输出不同 (ans不同).
+	2) 目前已知在有些用例上, 在集群上, 采用同样的编译命令, 两次编译出的可执行程序的输出不同 (ans不同).
+	对于上述两种情况的一些可能解释:
+	1) 运行整数规划求解器会消耗大量的内存, 在集群内存不够的时候可能会导致求解的结果错误.
+	   - 有些用例严重超内存, 被系统强行终止导致没有输出
+	   - 有些用例可能刚好在内存超界的边界上, 出现了答案错误
+	2) 求解器内部使用double类型, 可能会导致出错
+	3) 可能集群上的编译器版本过低, 导致在 -O2 等选项出现处理错误.
+	
