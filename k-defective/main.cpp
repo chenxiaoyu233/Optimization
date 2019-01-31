@@ -170,16 +170,21 @@ void ReadGraphClq() {
 void ReadGraphGraph() {
 	ifstream fin(globalArgs.readFileName.c_str());
 	string buffer;
+	int fmt = 0, ncon = 0;
 	getline(fin, buffer);
 	istringstream ss(buffer);
 	ss >> N >> M;
+	if (!ss.eof()) ss >> fmt;
+	if (!ss.eof()) ss >> ncon;
 	for (int i = 1; i <= N; i++) {
 		getline(fin, buffer);
 		istringstream ss(buffer);
-		int tmp;
+		int tmp, tmp_w;
+		for (int i = 0; i < ncon; i++) ss >> tmp;
 		while (!(ss >> tmp).eof()) {
 			int a = i - 1, b = tmp - 1;
 			edges.push_back(make_pair(a, b));
+			if (fmt) ss >> tmp_w;
 		}
 	}
 }
