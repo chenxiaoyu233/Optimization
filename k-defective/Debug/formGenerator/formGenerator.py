@@ -129,16 +129,16 @@ class FormGenerator:
             formatter = "& {}"
             for algorithm in algorithms:
                 print(formatter.format(algorithm), end = " ")
-                DB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile}).Sort(['k'], '<')
-                if len(DB.Rows) == 4:
-                    for row in DB.Rows:
-                        #print(row.dic['k'], end = " ")
+                #DB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile}).Sort(['k'], '<')
+                for i in range(1, 5):
+                    DB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile, 'k': str(i)})
+                    if len(DB.Rows) > 0: 
+                        row = DB.Rows[0]
                         print("& " + row.dic['ans'], end = " ")
                         print("& " + row.dic['size of search tree'], end = " ")
                         print("& " + row.dic['cost of time'], end = " ")
                         print("& " + row.dic['time out flag'], end = " ")
-                else:
-                    for i in range(4):
+                    else:
                         print("& X & X & X & X", end = " ")
                 print("\\\\") 
                 formatter = "& & & {}"
