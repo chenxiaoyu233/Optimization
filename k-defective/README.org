@@ -1,4 +1,6 @@
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+latex_compiler: xelatex
+#+latex_header: \usepackage{ctex}
 * KDefective 可执行文件命令行参数
 ** 解析参数所使用的代码
 	#+BEGIN_SRC c++ 
@@ -118,6 +120,8 @@
 	1) 运行整数规划求解器会消耗大量的内存, 在集群内存不够的时候可能会导致求解的结果错误.
 	   - 有些用例严重超内存, 被系统强行终止导致没有输出
 	   - 有些用例可能刚好在内存超界的边界上, 出现了答案错误
-	2) 求解器内部使用double类型, 可能会导致出错
-	3) 可能集群上的编译器版本过低, 导致在 -O2 等选项出现处理错误.
+	2) +求解器内部使用double类型, 可能会导致出错+
+	3) +可能集群上的编译器版本过低, 导致在 -O2 等选项出现处理错误+.
+	4) 建立补图时没有初始化内存空间, 且没有释放内存
+	对于这些猜想, 可能还需要进一步在集群上进行测试来验证.
 	
