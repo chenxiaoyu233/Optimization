@@ -29,6 +29,7 @@ void KDefectiveIP::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 	// 保证基类加边正常
 	KDefectiveBase::AddEdgeByVector(edges);
 	this -> edges = edges;
+	//this -> edges_backup = edges;
 	edgePreprocessingForGLPK();
 	total = (this -> edges.size() + 1) * (size + this -> edges.size()) + 1;
     ia = new int[total];
@@ -39,6 +40,7 @@ void KDefectiveIP::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 
 void KDefectiveIP::edgePreprocessingForGLPK() {
     bool *graph = new bool[size * size];
+	memset(graph, 0, sizeof(bool) * size * size);
 	for (auto &e: edges) {
         graph[e.first * size + e.second] = true;
         graph[e.second * size + e.first] = true;
@@ -48,6 +50,7 @@ void KDefectiveIP::edgePreprocessingForGLPK() {
         for (int j = i+1; j < size; j++) if(!graph[i * size + j]) {
             edges.push_back(make_pair(i + 1, j + 1));
         }
+	delete[] graph;
 }
 
 /*
@@ -145,13 +148,66 @@ int KDefectiveIP::Solve(int k) {
 	ampl -> solve();
 	ans = ampl -> getObjective("Maximum_KDefective").value();
 	*/
+	set <int> s; s.clear();
+
 	buildModel(k);
     if (!timeIsUp()) {
         int flag = glp_intopt(lp, &parm);
         //notFinish = (flag == GLP_ETMLIM);
         notFinish = flag != 0;
         ans = glp_mip_obj_val(lp);
+		//cerr << glp_mip_status(lp) << endl;
+		//cerr << GLP_UNDEF << " " << GLP_OPT << " " << GLP_FEAS << " " << GLP_NOFEAS << endl;
     }
+
+	// Debug
+	/*
+	for (int i = 0; i < size; i++) {
+		if (glp_mip_col_val(lp, i + 1) > 0) {
+			//cout << glp_mip_col_val(lp, i + 1) << " ";
+			cerr << i + 1 << " ";
+			s.insert(i + 1);
+		}
+	} cerr << "\n------------" << endl;
+	*/
+	/*
+	for (int i = 0; i < (int)edges.size(); i++) if(s.count(edges[i].first) && s.count(edges[i].second)) {
+		cerr << edges[i].first << " " << edges[i].second << " ";
+	  	cerr << glp_mip_col_val(lp, i + size + 1) << endl;
+		//cerr << glp_mip_row_val(lp, i + 1) << endl;
+	} cerr << "===============" << endl;
+	*/
+	/*
+	for (int i = 0; i < (int)edges.size(); i++) if (glp_mip_col_val(lp, i + size + 1) > 0) {
+		cout << edges[i].first << " " << edges[i].second << endl;
+	}*/
+	/*
+	for (int i = 0; i < (int)edges.size(); i++) {
+		cerr << glp_mip_col_val(lp, i + size + 1) << endl;
+	}*/
+	/*
+	for (int i = 0; i < (int)edges.size(); i++) {
+		cout << glp_mip_row_val(lp, i + 1) << endl;
+	}*/
+
+	/*
+	int counter = 0;
+	cerr << "original graph" << endl;
+	cerr << "graph {" << endl;
+	for (auto &e: edges_backup) if(s.count(e.first + 1) && s.count(e.second + 1)) {
+		cerr << e.first + 1 << " -- " << e.second + 1 << endl;
+		++ counter;
+	}
+	cerr << "}" << endl;
+	cerr << "counter: " << counter << endl;
+	cerr << "----------------" << endl;
+	cerr << "complement graph" << endl;
+	cerr << "graph {" << endl;
+	for (auto &e: edges) if(s.count(e.first) && s.count(e.second)) {
+		cerr << e.first << " -- " << e.second << endl;
+	}
+	cerr << "}" << endl;
+	*/
 
 	/* Debug
 	for (int i = 1; i <= 10; i++) {

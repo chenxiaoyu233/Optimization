@@ -9,6 +9,7 @@
 class KDefectiveIP: public KDefectiveBase {
 	private: 
 	vector<pair<int, int> > edges;
+	//vector<pair<int, int> > edges_backup; // 用于Debug (保存原图中的边)
 	//ampl::AMPL *ampl;
 	//void assignData(int k);
 
