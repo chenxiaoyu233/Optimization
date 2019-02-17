@@ -367,6 +367,7 @@ void SolveWork() {
 	printf("time-out-flag: %d\n", solver -> GetNotFinishFlag());
 	printf("number-of-vertex-before-prework: %d\n", BN);
 	printf("number-of-vertex-after-prework: %d\n", N);
+	printf("ans lower bound: %d\n", globalArgs.maxKDefective);
 
 	// 输出答案到指定文件
 	if (globalArgs.logFileName != "") {
@@ -377,6 +378,7 @@ void SolveWork() {
 		fprintf(log, "time-out-flag: %d\n", solver -> GetNotFinishFlag());
 		fprintf(log, "number-of-vertex-before-prework: %d\n", BN);
 		fprintf(log, "number-of-vertex-after-prework: %d\n", N);
+		fprintf(log, "ans lower bound: %d\n", globalArgs.maxKDefective);
 		fclose(log);
 	}
 
