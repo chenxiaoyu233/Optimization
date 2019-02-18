@@ -289,9 +289,17 @@ void SolveWork() {
 	}
 
 	// 去重边
+	if (globalArgs.algoType == "OnlyRead") {
+		printf("number-of-edge-origin: %lu\n", edges.size());
+	}
 	dealDoubleEdge();
 	// 去自环
 	dealSelfRing();
+	if (globalArgs.algoType == "OnlyRead") {
+		printf("number-of-edge-read-in: %lu\n", edges.size());
+		printf("number-of-vertex-before-prework: %d\n", N);
+		return;
+	}
 
 	// 暴力输出解(用于Debug其他的实现, 当然也包括预处理器)
 	if (globalArgs.algoType == "Bao") { 
