@@ -59,6 +59,17 @@
    | -G        | the type of graph the Program Read                  | clq/graph/SNAP            |
    | -M        | set the maximum size of clique in the graph by hand | an integer                |
 
+* Full Steps for Deployment
+  #+BEGIN_SRC bash
+  git clone https://github.com/chenxiaoyu233/Optimization
+  cd Optimization/k-defective
+  git checkout speed-up
+  tar -xzvf glpk-4.65.tar.gz
+  mv glpk-4.65 glpk
+  bash MyInstall.sh    #安装glpk, 所有文件都安装在 glpk/ 中
+  cmake -DNDEBUG=on .  #有些环境需要调整cmake (集群上需要打开 -static 选项)
+  make && make install #会在当前目录下和/Debug目录下生成可执行文件
+  #+END_SRC
 * Integer Programming Environment AMPL
   我多次和IBM官方联系, 他们告诉我说没有通过美国的软件出口审核.
   这导致我一直下载不了CPLEX, 我的工作一直无法开展.

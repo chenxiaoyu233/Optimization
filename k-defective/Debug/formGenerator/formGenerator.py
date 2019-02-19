@@ -13,9 +13,13 @@ class Row:
             pair = line.split(' ')
             if len(pair) < 2:
                 continue
+            if len(pair) > 2:
+                tmp1 = '-'.join(pair[0:-1])
+                pair = [tmp1, pair[-1]]
             pair[0] = pair[0].replace('-', ' ')
             pair[0] = pair[0][0:-1] # 去掉最后的冒号
             self.dic[pair[0]] = pair[1]
+
 
     # 分析文件名, 形成主键
     def __parseFileName(self, filename):
@@ -146,7 +150,78 @@ class FormGenerator:
         print(f.read())
         f.close()
 
-def main():
+    def timeToFloat(self, str):
+        if str == 'X': 
+            return 'X'
+        else: 
+            return float(str[0:-1])
+
+    def DropDataFiles(self, datafiles, algorithms):
+        ret = []
+        for datafile in datafiles:
+            Flag = True
+            LFlag = False
+            for k in range(1, 5):
+                RFlag = False
+                for algorithm in algorithms:
+                    curDB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile, 'k': str(k)})
+                    curT = self.timeToFloat(curDB.Rows[0].dic['cost of time']) if len(curDB.Rows) > 0 else 'X'
+                    if curT != 'X' and curT > 5:
+                        LFlag = True
+                    if curT != 'X' and curT < 18000:
+                        RFlag = True
+                if not RFlag:
+                    Flag = False
+                    break
+            if Flag and LFlag:
+                ret.append(datafile)
+        return ret
+
+    def PrintFormSilm(self):
+        """
+        \hline
+        \multirow{4}{*}{memplus.graph (X,X,X)} & 1 &X & X &X & X\\
+                                & 2 &X & X &X & X\\\
+                                & 3 &X & X &X & X\\
+                                & 4 &X & X &X & X\\
+        """
+        self.AddDirectory("Graph-Info/result")
+        datafiles = self.DB.ValueSetOfKey('datafile')
+        algorithms = ['Base', 'Base-noImprove', 'RDS', 'IP']
+        datafiles = self.DropDataFiles(datafiles, algorithms)
+        for datafile in datafiles:
+            print("\\hline")
+            print("\\multirow{{{}}}{{*}}{{{}}}".format(
+                2,
+                datafile,
+                ))
+            for k in range(1, 5):
+                if k == 3: 
+                    print("\\multirow{{{}}}{{*}}{{({}, {})}}".format(
+                        2,
+                        self.DB.Find({'algorithm': 'OnlyRead', 'datafile': datafile}).Rows[0].dic['number of vertex before prework'],
+                        self.DB.Find({'algorithm': 'OnlyRead', 'datafile': datafile}).Rows[0].dic['number of edge read in']
+                        ))
+
+                print(' & {}'.format(k), end = ' ')
+                print(' & {}'.format(self.DB.Find({'algorithm': 'Base-noImprove', 'datafile': datafile, 'k': str(k)}).Rows[0].dic['ans lower bound']), end = ' ')
+                print(' & {}'.format(self.DB.Find({'algorithm': 'Base', 'datafile': datafile, 'k': str(k)}).Rows[0].dic['ans']), end = ' ')
+                for algorithm in algorithms:
+                    tmp = self.DB.Find({'algorithm': algorithm, 'datafile': datafile, 'k': str(k)}).Rows
+                    cur = 'X'
+                    if len(tmp) > 0:
+                        cur = tmp[0].dic['cost of time']
+                        if cur != 'X':
+                            cur = float(cur[0:-1])
+                            if cur > 18000:
+                                cur = '$>$18k'
+                        else: 
+                            cur = 'X'
+                    print(' & {}'.format(cur), end = ' ')
+                print('\\\\')
+
+
+def GetFormDataBase():
     # 初始化
     form = FormGenerator()
 
@@ -155,10 +230,18 @@ def main():
     form.AddDirectory('Base-noColor/result/', {'algorithm': 'Base-noColor'})
     form.AddDirectory('Base-noDiam/result/', {'algorithm': 'Base-noDiam'})
     form.AddDirectory('RDS/result/')
-    form.AddDirectory('Ip')
+    form.AddDirectory('Ip/result/')
+    form.AddDirectory('Base-noImprove/result/', {'algorithm': 'Base-noImprove'})
+
+    return form
+    
+
+def main():
+    form = GetFormDataBase()
 
     # 输出
-    form.PrintForm()
+    #form.PrintForm()
+    form.PrintFormSilm()
 
 if __name__ == '__main__':
     sys.exit(main())
