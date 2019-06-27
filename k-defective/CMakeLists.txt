@@ -5,7 +5,11 @@ cmake_minimum_required (VERSION 2.6)
 project (KDefective)
 
 # 指定编译器
-SET(CMAKE_CXX_COMPILER "clang++")
+if (APPLE)
+    SET (CMAKE_CXX_COMPILER "clang++")
+elseif (UNIX)
+    SET (CMAKE_CXX_COMPILER "g++")
+endif (APPLE)
 
 # 调试开关
 option (NDEBUG "disable the debug" OFF)
