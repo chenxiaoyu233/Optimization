@@ -339,11 +339,13 @@ void SolveWork() {
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
 		else if (globalArgs.algoType == "IP") solver = new STLSetImplement<set<int>, KDefectiveIP>(N);
+        else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<set<int>, KDefectiveGurobi>(N);
 	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
 		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
 		else if (globalArgs.algoType == "IP") solver = new BitSetImplement<bitset<16000>, KDefectiveIP>(N);
+        else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<set<int>, KDefectiveGurobi>(N);
 	}
 
 	// 判断solver是否构造成功

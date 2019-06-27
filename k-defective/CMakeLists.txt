@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 2.6)
 project (KDefective)
 
 # 指定编译器
-SET(CMAKE_CXX_COMPILER "g++")
+SET(CMAKE_CXX_COMPILER "clang++")
 
 # 调试开关
 option (NDEBUG "disable the debug" OFF)
@@ -28,13 +28,22 @@ set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
 link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 
+# 配置Gurobi环境
+if (APPLE)
+    set (GUROBI_INCLUDE_DIR "/Library/gurobi811/mac64/include")
+    set (GUROBI_LIB_DIR "/Library/gurobi811/mac64/lib")
+endif (APPLE)
+
+include_directories ("${GUROBI_INCLUDE_DIR}")
+link_directories ("${GUROBI_LIB_DIR}")
+
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
 
 # 编译生成可执行文件
 add_executable (KDefective ${source_list})
 #target_link_libraries (KDefective ampl)
-target_link_libraries (KDefective glpk)
+target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
 
 # 安装
 set (CMAKE_INSTALL_PREFIX ".")
