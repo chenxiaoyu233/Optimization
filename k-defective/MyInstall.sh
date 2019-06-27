@@ -1,6 +1,6 @@
 
 cd glpk
-CFLAGS=-O2 ./configure --disable-shared --prefix=$(pwd)
+CFLAGS="-O2 -fPIC" ./configure --disable-shared --prefix=$(pwd)
 make
 make check
 make install

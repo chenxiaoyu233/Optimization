@@ -54,7 +54,11 @@ aux_source_directory (. source_list)
 # 编译生成可执行文件
 add_executable (KDefective ${source_list})
 #target_link_libraries (KDefective ampl)
-target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
+if (APPLE)
+    target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
+elseif (UNIX)
+    target_link_libraries (KDefective glpk gurobi_g++5.2 gurobi81)
+endif (APPLE)
 
 # 安装
 set (CMAKE_INSTALL_PREFIX ".")
