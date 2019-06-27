@@ -16,7 +16,11 @@ else (NDEBUG)
 endif (NDEBUG)
 
 set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-#set (CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
+
+# build a static package to fit the cluster
+if (UNIX)
+    set (CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
+endif (UNIX)
 
 # 配置AMPL库
 #SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
