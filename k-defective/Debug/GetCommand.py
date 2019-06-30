@@ -17,7 +17,7 @@ timeLimit = 18000 # = 2 * 3600
 
 # 数据集的位置
 #dataDir = "./graph"
-dataDir = "../msbundle/benchmark/benchmark/selected"
+dataDir = "../../msbundle/benchmark/benchmark/selected"
 
 # 存储结果的位置
 targetDir = "./result"
