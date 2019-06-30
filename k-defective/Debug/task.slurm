@@ -1,5 +1,5 @@
 #!/bin/bash
-# work.slurm
+# task.slurm
 #SBATCH --job-name=kdefect
 #SBATCH --mail-type=end
 #SBATCH --mail-user=yi.zhou@univ-angers.fr
