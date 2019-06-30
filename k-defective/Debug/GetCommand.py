@@ -27,7 +27,7 @@ execDir = "./KDefective"
 
 # 命令的模板
 #cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p {8} > {9}" # @todo
-cmd = "work.slurm {0} {1} {2} {3} {4} {5} {6} {8} {8} {9} {10}"
+cmd = "sbatch task.slurm {0} {1} {2} {3} {4} {5} {6} {8} {8} {9} {10}"
 
 # Result:
 command = ['#!/bin/bash']
