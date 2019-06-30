@@ -26,7 +26,8 @@ targetDir = "./result"
 execDir = "./KDefective"
 
 # 命令的模板
-cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p {8} > {9}" # @todo
+#cmd = "{0} -O solve -a {1} -t {2} -D {3} -k {4} -r {5} -G {6} -M {7} -p {8} > {9}" # @todo
+cmd = "work.slurm {0} {1} {2} {3} {4} {5} {6} {8} {8} {9} {10}"
 
 # Result:
 command = ['#!/bin/bash']
@@ -44,7 +45,7 @@ def FindNInDataFile(data):
                     return int(s)
 
 
-def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStructure, Flags):
+def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStructure, Flags, cnt):
     global execDir, timeLimit
     command.append(
         cmd.format(
@@ -56,7 +57,8 @@ def AddCommand(algorithm, k, dataFile, resultDir, cliqueSize, fileType, dataStru
                 dataFile,
                 algorithm,
                 k
-            )
+            ),
+            cnt
         )
     )
 
@@ -85,9 +87,11 @@ def main(argv = sys.argv):
             os.mkdir(resultDir)
 
         # 生成指令
+        cnt = 0
         for t in kList:
             for algo in algoList:
-                AddCommand(algo, t, dataFile, resultDir, item[1], item[2], item[3], argv[1])
+                cnt += 1
+                AddCommand(algo, t, dataFile, resultDir, item[1], item[2], item[3], argv[1], cnt)
     
     # 将指令输出
     for line in command:
