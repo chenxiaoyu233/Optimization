@@ -7,7 +7,7 @@ import os
 # Parameters: 用于控制生成的指令
 
 # k值的取值范围(n的倍数)
-kList = [1, 4]
+kList = [1, 2, 3, 4]
 
 # 需要测试的算法类型
 algoList = ['Base', 'RDS', 'Simple']
@@ -70,6 +70,7 @@ def ResultFile(resultDir, dataFile, algorithm, k):
 def main(argv = sys.argv):
     fin = open("TestList_10th.txt", "r")
     cases = fin.read().split('\n')
+    cnt = 0
     for item in cases:
         item = item.split(' ')
         if len(item) < 4:
@@ -86,7 +87,6 @@ def main(argv = sys.argv):
             os.mkdir(resultDir)
 
         # 生成指令
-        cnt = 0
         for t in kList:
             for algo in algoList:
                 cnt += 1
