@@ -31,10 +31,10 @@ void KDefectiveGurobi::edgePreprocessingForGurobi() {
 }
 
 void KDefectiveGurobi::solve(int k) {
-    GRBEnv env = GRBEnv(true);
-    env.start();
-    GRBModel model = GRBModel(env);
     try{
+        GRBEnv env = GRBEnv(true);
+        env.start();
+        GRBModel model = GRBModel(env);
         /* set time limit */
         if (timeLimit != -1) model.set(GRB_DoubleParam_TimeLimit, timeLimit);
         /* declare varibles for verteces */
@@ -53,15 +53,15 @@ void KDefectiveGurobi::solve(int k) {
         model.addConstr(exp <= k);
         /* solve the model */
         model.optimize();
+        /* collect answer and status */
+        ans = model.get(GRB_DoubleAttr_ObjVal);
+        notFinish = model.get(GRB_IntAttr_Status) != GRB_OPTIMAL;
     } catch (GRBException e) {
         cerr << "Error code =" << e.getErrorCode() << endl ;
         cerr << e.getMessage() << endl ;
     } catch (...) {
         cerr << "Exception during optimization" << endl ;
     }
-    /* collect answer and status */
-    ans = model.get(GRB_DoubleAttr_ObjVal);
-    notFinish = model.get(GRB_IntAttr_Status) != GRB_OPTIMAL;
 }
 
 int KDefectiveGurobi::Solve(int k) {
