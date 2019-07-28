@@ -72,7 +72,7 @@ add_executable (KDefective ${source_list})
 if (APPLE)
     target_link_libraries (KDefective glpk)
 elseif (UNIX)
-    target_link_libraries (KDefective glpk ilocplex concert cplex m pthread)
+    target_link_libraries (KDefective glpk ilocplex concert cplex m pthread dl)
 endif (APPLE)
 
 # 安装
