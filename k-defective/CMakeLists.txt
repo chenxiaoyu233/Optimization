@@ -48,6 +48,7 @@ link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 # include_directories ("${GUROBI_INCLUDE_DIR}")
 # link_directories ("${GUROBI_LIB_DIR}")
 
+set (CMAKE_CXX_FLAGS "-DIL_STD ${CMAKE_CXX_FLAGS}")
 # setting cplex environmenet on cluster
 if (UNIX)
     include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/include")
