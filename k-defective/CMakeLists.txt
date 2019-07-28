@@ -37,16 +37,16 @@ include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
 link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 
 # 配置Gurobi环境
-if (APPLE)
-    set (GUROBI_INCLUDE_DIR "/Library/gurobi811/mac64/include")
-    set (GUROBI_LIB_DIR "/Library/gurobi811/mac64/lib")
-elseif (UNIX)
-    set (GUROBI_INCLUDE_DIR "/home/yi.zhou/Gurobi_Env/gurobi811/linux64/include")
-    set (GUROBI_LIB_DIR "/home/yi.zhou/Gurobi_Env/gurobi811/linux64/lib")
-endif (APPLE)
+# if (APPLE)
+#     set (GUROBI_INCLUDE_DIR "/Library/gurobi811/mac64/include")
+#     set (GUROBI_LIB_DIR "/Library/gurobi811/mac64/lib")
+# elseif (UNIX)
+#     set (GUROBI_INCLUDE_DIR "/home/yi.zhou/Gurobi_Env/gurobi811/linux64/include")
+#     set (GUROBI_LIB_DIR "/home/yi.zhou/Gurobi_Env/gurobi811/linux64/lib")
+# endif (APPLE)
 
-include_directories ("${GUROBI_INCLUDE_DIR}")
-link_directories ("${GUROBI_LIB_DIR}")
+# include_directories ("${GUROBI_INCLUDE_DIR}")
+# link_directories ("${GUROBI_LIB_DIR}")
 
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
@@ -54,10 +54,15 @@ aux_source_directory (. source_list)
 # 编译生成可执行文件
 add_executable (KDefective ${source_list})
 #target_link_libraries (KDefective ampl)
+# if (APPLE)
+#     target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
+# elseif (UNIX)
+#     target_link_libraries (KDefective glpk gurobi_g++5.2 gurobi81)
+# endif (APPLE)
 if (APPLE)
-    target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
+    target_link_libraries (KDefective glpk)
 elseif (UNIX)
-    target_link_libraries (KDefective glpk gurobi_g++5.2 gurobi81)
+    target_link_libraries (KDefective glpk)
 endif (APPLE)
 
 # 安装
