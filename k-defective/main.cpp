@@ -346,7 +346,7 @@ void SolveWork() {
 		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
 		else if (globalArgs.algoType == "IP") solver = new BitSetImplement<bitset<16000>, KDefectiveIP>(N);
-        else if (globalArgs.algoType == "CPLEX") solver = new STLSetImplement<bitset<16000>, KDefectiveCPLEX>(N);
+        else if (globalArgs.algoType == "CPLEX") solver = new STLSetImplement<set<int>, KDefectiveCPLEX>(N);
         //else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<bitset<int>, KDefectiveGurobi>(N);
 	}
 
