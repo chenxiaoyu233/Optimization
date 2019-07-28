@@ -48,6 +48,15 @@ link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 # include_directories ("${GUROBI_INCLUDE_DIR}")
 # link_directories ("${GUROBI_LIB_DIR}")
 
+# setting cplex environmenet on cluster
+if (UNIX)
+    include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/include")
+    link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/lib/x86-64_linux/static_pic")
+    include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/include")
+    link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/lib/x86-64_linux/static_pic")
+endif (UNIX)
+
+
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
 
@@ -62,7 +71,7 @@ add_executable (KDefective ${source_list})
 if (APPLE)
     target_link_libraries (KDefective glpk)
 elseif (UNIX)
-    target_link_libraries (KDefective glpk)
+    target_link_libraries (KDefective glpk ilocplex concert cplex m pthread)
 endif (APPLE)
 
 # 安装
