@@ -369,7 +369,7 @@ static void search_initial_maximum_clique() {
 	}
 	node = choose_candidate_node();
 	while (node != NONE) {
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		j = 0;
 		push(node, INIT_Stack);
 		for (i = 0; i < ptr(Candidate_Stack); i++) {
@@ -1617,7 +1617,7 @@ static void search_maxclique(int cutoff, int print_info) {
 				"c  Size| Index|NB_Vertex  NB_IncUB    NB_Iset  NB_MaxSat|  NB_Branch\n");
 	}
 	while (CURSOR> 0) {
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		node=Candidate_Stack[--CURSOR];
 		if(CUR_CLQ_SIZE>0 && node>0)
 		continue;
@@ -1694,7 +1694,7 @@ static int sort_by_maxiset(int mandatory) {
 	nb_node = ptr(Candidate_Stack);
 	push(DELIMITER, Candidate_Stack);
 	while (ptr(Candidate_Stack) > 1) {
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return 0;); /* time cuter */
 		LIST_ALL = FALSE;
 		MAX_CLQ_SIZE = 0;
 		search_maxclique(50000, FALSE);
@@ -1883,13 +1883,13 @@ KDefectiveR2MC *shell;
 void MOMCSolver() {
 	int i, ordering = -1, _all = FALSE;
 	if (build_simple_graph_instance(shell -> ss)) {
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		search_initial_maximum_clique();
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		init_for_maxclique(ordering, _all);
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		re_code();
-        TIME_CUTTER; /* time cuter */
+        TIME_CUTTER(return;); /* time cuter */
 		search_maxclique(0, TRUE);
 		//printallMaxClique();
         shell -> ans = max(shell -> ans, MAX_CLQ_SIZE); // update ans

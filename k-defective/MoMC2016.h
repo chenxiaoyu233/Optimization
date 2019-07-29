@@ -6,10 +6,10 @@
 extern KDefectiveR2MC *shell;
 void MOMCSolver();
 
-#define TIME_CUTTER do {\
-    if (shell -> timeIsUp()) {\
-        shell -> notFinish = true;\
-        return 0;\
+#define TIME_CUTTER(...) do {\
+    if (shell -> TimeIsUp()) {\
+        shell -> SetNotFinish(true);
+        __VA_ARGS__;
     }\
 } while (0)
 

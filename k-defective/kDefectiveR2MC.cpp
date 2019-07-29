@@ -74,3 +74,6 @@ int KDefectiveR2MC::Solve(int k) {
     fprintf(stderr, "%lu\n", count);
     return ans;
 }
+
+bool KDefectiveR2MC::TimeIsUp() { return this -> timeIsUp(); }
+void KDefectiveR2MC::SetNotFinish(bool val) { notFinish = val; }

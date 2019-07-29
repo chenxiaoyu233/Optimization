@@ -18,6 +18,8 @@ class KDefectiveR2MC: public KDefectiveBase {
         KDefectiveR2MC(int n);
         virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
         virtual int Solve(int k);
+        bool TimeIsUp();
+        void SetNotFinish(bool val);
 };
 
 #endif
