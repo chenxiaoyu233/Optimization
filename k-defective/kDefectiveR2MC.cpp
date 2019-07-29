@@ -9,7 +9,6 @@ void KDefectiveR2MC::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 	// 保证基类加边正常
 	KDefectiveBase::AddEdgeByVector(edges);
 	this -> edges = edges;
-    edgesSizeOri = edges.size();
 }
 
 void KDefectiveR2MC::encodeGraph() {
@@ -35,8 +34,8 @@ void KDefectiveR2MC::search(int idx, int k) {
     }
     int u = 0, v = 1;
     if (!edge_stack.empty()) {
-        u = edges.first;
-        v = edges.second;
+        u = edge_stack.back().first;
+        v = edge_stack.back().second;
     }
     for (; u < size; ++u, v = u + 1) {
         for (; v < size; ++v) if (!graph[u * size + v]) {
