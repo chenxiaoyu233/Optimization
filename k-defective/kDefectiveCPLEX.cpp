@@ -42,7 +42,7 @@ void KDefectiveCPLEX::solve(int k) {
 
         // solve
         IloCplex cplex(model);
-        cplex.setParam(IloCplex::TiLim, timeLimit);
+        if (timeLimit >= 0) cplex.setParam(IloCplex::TiLim, timeLimit);
         if (cplex.solve()) {
             notFinish = cplex.getStatus() != IloAlgorithm::Status::Optimal;
             ans = cplex.getObjValue();

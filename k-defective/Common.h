@@ -2,6 +2,7 @@
 #define __COMMON_H__
 
 #include <iostream>
+#include <sstream>
 #include <cstdio>
 #include <cstring>
 #include <vector>
