@@ -2,7 +2,7 @@
 
 for ((i = 1; i; i = i + 1))
 do
-	./KDefective -O generate -n 100 -d 0.1 -w main.in
+	./KDefective -O generate -n 20 -d 0.1 -w main.in
 	K=`expr $RANDOM % 5 + 1`
 	echo k: $K
 	./KDefective -O solve -a RDS -D Bitset -k $K -r main.in -p -l RDS.out 2> /dev/null > /dev/null
