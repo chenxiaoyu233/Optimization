@@ -8,8 +8,8 @@ void MOMCSolver();
 
 #define TIME_CUTTER(...) do {\
     if (shell -> TimeIsUp()) {\
-        shell -> SetNotFinish(true);
-        __VA_ARGS__;
+        shell -> SetNotFinish(true);\
+        __VA_ARGS__;\
     }\
 } while (0)
 
