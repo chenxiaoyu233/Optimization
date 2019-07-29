@@ -20,6 +20,7 @@ class KDefectiveR2MC: public KDefectiveBase {
         virtual int Solve(int k);
         bool TimeIsUp();
         void SetNotFinish(bool val);
+        void UpdateAns(int val);
 };
 
 #endif

@@ -1892,9 +1892,9 @@ void MOMCSolver() {
         TIME_CUTTER(return;); /* time cuter */
 		search_maxclique(0, TRUE);
 		//printallMaxClique();
-        shell -> ans = max(shell -> ans, MAX_CLQ_SIZE); // update ans
+        shell -> UpdateAns(MAX_CLQ_SIZE); // update ans
 	} else {
-        shell -> notFinish = true;
+        shell -> SetNotFinish(true);
     }
 }
 

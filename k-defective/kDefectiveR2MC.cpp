@@ -77,3 +77,4 @@ int KDefectiveR2MC::Solve(int k) {
 
 bool KDefectiveR2MC::TimeIsUp() { return this -> timeIsUp(); }
 void KDefectiveR2MC::SetNotFinish(bool val) { notFinish = val; }
+void KDefectiveR2MC::UpdateAns(int val) { ans = max(ans, val); }
