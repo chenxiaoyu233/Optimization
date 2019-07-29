@@ -1,4 +1,5 @@
 #define MOMC // use the MOMC algo
+#include "MoMC2016.h"
 //This is a software for finding a maximum clique in an undirected graph.
 //Copyright <2016> <Chu-Min Li & Hua Jiang>
 //
@@ -1880,6 +1881,7 @@ void print_version() {
 
 KDefectiveR2MC *shell;
 void MOMCSolver() {
+	int i, ordering = -1, _all = FALSE;
 	if (build_simple_graph_instance(shell -> ss)) {
         TIME_CUTTER; /* time cuter */
 		search_initial_maximum_clique();
