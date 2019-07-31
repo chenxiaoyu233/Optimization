@@ -38,7 +38,7 @@ void KDefectiveR2MC::callMaximumCliqueSolver() {
     FILE *in = fopen(mf.c_str(), "r");
     int cur = 0; fscanf(in, "%*s%*s%*s%*s%d", &cur);
     ans = max(ans, cur);
-    fprintf("update ans: %d\n", ans);
+    fprintf(stderr, "update ans: %d\n", ans);
     fclose(in);
 
     // 释放文件
