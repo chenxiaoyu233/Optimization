@@ -1,9 +1,4 @@
-#define MOMC // use the MOMC algo
-#include "MoMC2016.h"
-#define IF_FREE(pointer) do {\
-    if (pointer != NULL) free(pointer); \
-    pointer = NULL; \
-} while (0)
+
 //This is a software for finding a maximum clique in an undirected graph.
 //Copyright <2016> <Chu-Min Li & Hua Jiang>
 //
@@ -161,116 +156,6 @@ static int static_degree_dec(const void * a, const void * b) {
 		return 1;
 	}
 }
-
-#include <sstream>
-#include <string>
-#include <vector>
-using namespace std;
-vector<int*> collection;
-static int build_simple_graph_instance(stringstream &ss) {
-	//FILE* fp_in = fopen(input_file, "r");
-	//char ch, words[WORD_LENGTH];
-    FORMAT = 0;
-    char ch;
-    string words;
-	int i, j, e, nb1, nb2, node, left_node, right_node, nb_edge = 0;
-	//if (fp_in == NULL )
-    //    return FALSE;
-	if (FORMAT == 1) {
-		//fscanf(fp_in, "%c", &ch);
-        ss >> ch;
-		while (ch != 'p') {
-			while (ch != '\n')
-                ss >> ch;
-				//fscanf(fp_in, "%c", &ch);
-            ss >> ch;
-			//fscanf(fp_in, "%c", &ch);
-		}
-        ss >> words >> NB_NODE >> NB_EDGE;
-		//fscanf(fp_in, "%s%d%d", words, &NB_NODE, &NB_EDGE);
-	} else
-        ss >> NB_NODE >> NB_EDGE;
-		//fscanf(fp_in, "%d%d", &NB_NODE, &NB_EDGE);
-
-	if(NB_NODE>=tab_node_size){
-	  printf("The number of vertices exceeds the limitation of (%d).\n", tab_node_size);
-	  exit(0);
-	}
-
-	for (i = 0; i < NB_EDGE; i++) {
-		if (FORMAT == 1)
-            ss >> words >> left_node >> right_node;
-			//fscanf(fp_in, "%s%d%d", words, &left_node, &right_node);
-		else
-            ss >> left_node >> right_node;
-			//fscanf(fp_in, "%d%d", &left_node, &right_node);
-		if (left_node == right_node) {
-			i--, NB_EDGE--;
-		} else {
-			if (left_node > right_node) {
-				e = right_node;
-				right_node = left_node;
-				left_node = e;
-			}
-			if (matrice[left_node][right_node] == FALSE) {
-				matrice[left_node][right_node] = TRUE;
-				matrice[right_node][left_node] = TRUE;
-				static_degree[left_node]++;
-				static_degree[right_node]++;
-				nb_edge++;
-			}
-		}
-	}
-	//fclose(fp_in);
-    if (!collection.empty()) { //
-        for (auto p: collection) free(p);
-        collection.clear();
-    }
-	NB_EDGE = nb_edge;
-	for (i = 1; i <= NB_NODE; i++) {
-		node_state[i] = ACTIVE;
-		active_degree[i] = static_degree[i];
-
-	
-		none_degree[i] = NB_NODE - static_degree[i] - 1;
-		none_neibors[i] = (int *) malloc(
-				(NB_NODE+2) * sizeof(int));
-        collection.push_back(none_neibors[i]); //
-	        node_neibors[i] = none_neibors[i] + none_degree[i]+1;
-
-		nb1 = 0;
-		nb2 = 0;
-		for (j = 1; j <= NB_NODE; j++) {
-			if (matrice[i][j] == TRUE)
-				node_neibors[i][nb1++] = j;
-			else if (i != j) {
-				none_neibors[i][nb2++] = j;
-			}
-		}
-		node_neibors[i][nb1] = NONE;
-		none_neibors[i][nb2] = NONE;
-	}
-
-	ptr(INIT_Stack) = 0;
-    IF_FREE(INIT_Stack);
-	INIT_Stack = (int *) malloc((NB_NODE + 1) * sizeof(int));
-
-    IF_FREE(static_matrix);
-	static_matrix = (char *) malloc(
-			(NB_NODE + 1) * (NB_NODE + 1) * sizeof(char));
-	for (node = 1; node <= NB_NODE; node++) {
-		qsort(none_neibors[node], none_degree[node], sizeof(int),
-				none_degree_inc);
-		qsort(node_neibors[node], static_degree[node], sizeof(int),
-				static_degree_dec);
-	}
-	printf("c Instance Information: #node=%d, #edge=%d density= %5.4f \n",
-			NB_NODE, NB_EDGE,
-			((float) NB_EDGE * 2) / (NB_NODE * (NB_NODE - 1)));
-
-	return TRUE;
-}
-/*
 static int build_simple_graph_instance(char *input_file) {
 	FILE* fp_in = fopen(input_file, "r");
 	char ch, words[WORD_LENGTH];
@@ -357,7 +242,7 @@ static int build_simple_graph_instance(char *input_file) {
 			((float) NB_EDGE * 2) / (NB_NODE * (NB_NODE - 1)));
 
 	return TRUE;
-}*/
+}
 
 static int choose_candidate_node() {
 	int i, chosen_node = NONE, node, max_degree;
@@ -381,7 +266,6 @@ static void search_initial_maximum_clique() {
 	}
 	node = choose_candidate_node();
 	while (node != NONE) {
-        TIME_CUTTER(return;); /* time cuter */
 		j = 0;
 		push(node, INIT_Stack);
 		for (i = 0; i < ptr(Candidate_Stack); i++) {
@@ -1410,7 +1294,6 @@ static void store_maximal_clique(int node) {
 
 	if (APPEND_STACK_USED + ptr(Clique_Stack) + 1 > APPEND_STACK_SIZE) {
 		if (APPEND_STACK_SIZE < 1024 * 1024) {
-            IF_FREE(temp);
 			temp = (int *) malloc(APPEND_STACK_SIZE * 2 * sizeof(int));
 			if (temp != NULL ) {
 				memcpy(temp, APPEND_STACK, APPEND_STACK_USED * sizeof(int));
@@ -1630,7 +1513,6 @@ static void search_maxclique(int cutoff, int print_info) {
 				"c  Size| Index|NB_Vertex  NB_IncUB    NB_Iset  NB_MaxSat|  NB_Branch\n");
 	}
 	while (CURSOR> 0) {
-        TIME_CUTTER(return;); /* time cuter */
 		node=Candidate_Stack[--CURSOR];
 		if(CUR_CLQ_SIZE>0 && node>0)
 		continue;
@@ -1707,7 +1589,6 @@ static int sort_by_maxiset(int mandatory) {
 	nb_node = ptr(Candidate_Stack);
 	push(DELIMITER, Candidate_Stack);
 	while (ptr(Candidate_Stack) > 1) {
-        TIME_CUTTER(return 0;); /* time cuter */
 		LIST_ALL = FALSE;
 		MAX_CLQ_SIZE = 0;
 		search_maxclique(50000, FALSE);
@@ -1787,7 +1668,6 @@ static void init_for_maxclique(int ordering, int list_all) {
 	if (LIST_ALL == TRUE) {
 		MAX_CLQ_SIZE = ptr(INIT_Stack);
 		memcpy(MaxCLQ_Stack, INIT_Stack, ptr(INIT_Stack) * sizeof(int));
-        IF_FREE(APPEND_STACK);
 		APPEND_STACK = (int *) malloc((NB_NODE + 1) * 10 * sizeof(int));
 		APPEND_STACK_SIZE = (NB_NODE + 1) * 10;
 		APPEND_STACK_USED = 0;
@@ -1893,26 +1773,6 @@ void print_version() {
 	exit(0);
 }
 
-KDefectiveR2MC *shell;
-void MOMCSolver() {
-	int i, ordering = -1, _all = FALSE;
-	if (build_simple_graph_instance(shell -> ss)) {
-        TIME_CUTTER(return;); /* time cuter */
-		search_initial_maximum_clique();
-        TIME_CUTTER(return;); /* time cuter */
-		init_for_maxclique(ordering, _all);
-        TIME_CUTTER(return;); /* time cuter */
-		re_code();
-        TIME_CUTTER(return;); /* time cuter */
-		search_maxclique(0, TRUE);
-		//printallMaxClique();
-        shell -> UpdateAns(MAX_CLQ_SIZE); // update ans
-	} else {
-        shell -> SetNotFinish(true);
-    }
-}
-
-/*
 int main(int argc, char *argv[]) {
 	struct rusage starttime, endtime;
 	long sec, usec, sec_p, usec_p;
@@ -1975,4 +1835,4 @@ int main(int argc, char *argv[]) {
 
 	return TRUE;
 }
-*/
+

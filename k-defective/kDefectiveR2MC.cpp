@@ -1,5 +1,4 @@
 #include "kDefectiveR2MC.h"
-#include "MoMC2016.h"
 
 KDefectiveR2MC::KDefectiveR2MC(int n): KDefectiveBase(n) {
     edges.clear();
@@ -12,15 +11,38 @@ void KDefectiveR2MC::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 }
 
 void KDefectiveR2MC::encodeGraph() {
-    ss << size << " " << edges.size() + edge_stack.size() << "\n";
-    for (auto &e: edges) ss << e.first << " " << e.second << "\n";
-    for (auto &e: edge_stack) ss << e.first << " " << e.second << "\n";
+    FILE *out = fopen(gf.c_str(), "w");
+    fprintf(out, "p %d word %lu %lu\n", size, edges.size(), edge_stack.size());
+    for (auto &e: edges) 
+        fprintf(out, "e %d %d\n", e.first, e.second);
+    for (auto &e: edge_stack) 
+        fprintf(out, "e %d %d\n", e.first, e.second);
+    fclose(out);
 }
 
 void KDefectiveR2MC::callMaximumCliqueSolver() {
+    // ask OS for two temp file
+    char midFile[] = "mid.XXXXXX";
+    mkstemp(midFile);
+    mf = string(midFile);
+    char graphFile[] = "graph.XXXXXX";
+    mkstemp(graphFile);
+    gf = string(graphFile);
+
+    // output the graph to a file
     encodeGraph();
-    shell = this;
-    MOMCSolver();
+
+    // collect the answer from a file
+    system((string("./MOMC ") + gf + string(" > ") + mf).c_str());
+    system((string("tail -n 1 ") + mf + string(" | tee ") + mf).c_str());
+    FILE *in = fopen(mf.c_str(), "r");
+    int cur = 0; fscanf(in, "%*s%*s%*s%*s%d", &cur);
+    ans = max(ans, cur);
+    fclose(in);
+
+    // 释放文件
+    unlink(midFile);
+    unlink(graphFile);
 }
 
 void KDefectiveR2MC::search(int idx, int k) {
@@ -29,6 +51,10 @@ void KDefectiveR2MC::search(int idx, int k) {
         return;
     }
     if (idx > k) {
+        callMaximumCliqueSolver();
+        return;
+    }
+    if (edges.size() + edge_stack.size() == size * (size - 1) / 2) {
         callMaximumCliqueSolver();
         return;
     }

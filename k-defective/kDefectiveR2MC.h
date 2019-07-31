@@ -6,6 +6,7 @@
 
 class KDefectiveR2MC: public KDefectiveBase {
     private:
+        string mf /*middle file*/, gf /*graph file*/;
         vector<pair<int, int> > edges;
         list<pair<int, int> > edge_stack;
         bool *graph;
@@ -14,7 +15,7 @@ class KDefectiveR2MC: public KDefectiveBase {
         void search(int idx, int k);
         void callMaximumCliqueSolver();
     public:
-        stringstream ss;
+        //stringstream ss;
         KDefectiveR2MC(int n);
         virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
         virtual int Solve(int k);
