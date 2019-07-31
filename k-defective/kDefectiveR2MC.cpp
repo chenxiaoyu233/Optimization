@@ -23,10 +23,10 @@ void KDefectiveR2MC::encodeGraph() {
 void KDefectiveR2MC::callMaximumCliqueSolver() {
     // ask OS for two temp file
     char midFile[] = "mid.XXXXXX";
-    mkstemp(midFile);
+    int mf_id = mkstemp(midFile);
     mf = string(midFile);
     char graphFile[] = "graph.XXXXXX";
-    mkstemp(graphFile);
+    int gf_id = mkstemp(graphFile);
     gf = string(graphFile);
 
     // output the graph to a file
@@ -43,6 +43,8 @@ void KDefectiveR2MC::callMaximumCliqueSolver() {
     // 释放文件
     unlink(midFile);
     unlink(graphFile);
+    close(mf_id);
+    close(gf_id);
 }
 
 void KDefectiveR2MC::search(int idx, int k) {
