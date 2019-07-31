@@ -1,7 +1,7 @@
 #define MOMC // use the MOMC algo
 #include "MoMC2016.h"
 #define IF_FREE(pointer) do {\
-    if (pointer != NULL) free(pointer);
+    if (pointer != NULL) free(pointer); \
 } whlie (0)
 //This is a software for finding a maximum clique in an undirected graph.
 //Copyright <2016> <Chu-Min Li & Hua Jiang>
