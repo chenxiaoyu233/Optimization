@@ -33,8 +33,7 @@ void KDefectiveR2MC::callMaximumCliqueSolver() {
     encodeGraph();
 
     // collect the answer from a file
-    system((string("./MOMC ") + gf + string(" > ") + mf).c_str());
-    system((string("tail -n 1 ") + mf + string(" | tee ") + mf).c_str());
+    system((string("./MOMC ") + gf + string(" | tail -n 1 | tee ") + mf).c_str());
     FILE *in = fopen(mf.c_str(), "r");
     int cur = 0; fscanf(in, "%*s%*s%*s%*s%d", &cur);
     ans = max(ans, cur);
