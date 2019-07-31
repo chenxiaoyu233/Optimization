@@ -1,5 +1,8 @@
 #define MOMC // use the MOMC algo
 #include "MoMC2016.h"
+#define IF_FREE(pointer) do {\
+    if (pointer != NULL) free(pointer);
+} whlie (0)
 //This is a software for finding a maximum clique in an undirected graph.
 //Copyright <2016> <Chu-Min Li & Hua Jiang>
 //
@@ -223,6 +226,7 @@ static int build_simple_graph_instance(stringstream &ss) {
 
 	
 		none_degree[i] = NB_NODE - static_degree[i] - 1;
+        IF_FREE(none_neibors[i]);
 		none_neibors[i] = (int *) malloc(
 				(NB_NODE+2) * sizeof(int));
 
@@ -242,8 +246,10 @@ static int build_simple_graph_instance(stringstream &ss) {
 	}
 
 	ptr(INIT_Stack) = 0;
+    IF_FREE(INIT_Stack);
 	INIT_Stack = (int *) malloc((NB_NODE + 1) * sizeof(int));
 
+    IF_FREE(static_matrix);
 	static_matrix = (char *) malloc(
 			(NB_NODE + 1) * (NB_NODE + 1) * sizeof(char));
 	for (node = 1; node <= NB_NODE; node++) {
@@ -1398,6 +1404,7 @@ static void store_maximal_clique(int node) {
 
 	if (APPEND_STACK_USED + ptr(Clique_Stack) + 1 > APPEND_STACK_SIZE) {
 		if (APPEND_STACK_SIZE < 1024 * 1024) {
+            IF_FREE(temp);
 			temp = (int *) malloc(APPEND_STACK_SIZE * 2 * sizeof(int));
 			if (temp != NULL ) {
 				memcpy(temp, APPEND_STACK, APPEND_STACK_USED * sizeof(int));
@@ -1774,6 +1781,7 @@ static void init_for_maxclique(int ordering, int list_all) {
 	if (LIST_ALL == TRUE) {
 		MAX_CLQ_SIZE = ptr(INIT_Stack);
 		memcpy(MaxCLQ_Stack, INIT_Stack, ptr(INIT_Stack) * sizeof(int));
+        IF_FREE(APPEND_STACK);
 		APPEND_STACK = (int *) malloc((NB_NODE + 1) * 10 * sizeof(int));
 		APPEND_STACK_SIZE = (NB_NODE + 1) * 10;
 		APPEND_STACK_USED = 0;
