@@ -2,6 +2,7 @@
 #include "MoMC2016.h"
 #define IF_FREE(pointer) do {\
     if (pointer != NULL) free(pointer); \
+    pointer = NULL; \
 } while (0)
 //This is a software for finding a maximum clique in an undirected graph.
 //Copyright <2016> <Chu-Min Li & Hua Jiang>
@@ -163,7 +164,9 @@ static int static_degree_dec(const void * a, const void * b) {
 
 #include <sstream>
 #include <string>
+#include <vector>
 using namespace std;
+vector<int*> collection;
 static int build_simple_graph_instance(stringstream &ss) {
 	//FILE* fp_in = fopen(input_file, "r");
 	//char ch, words[WORD_LENGTH];
@@ -219,6 +222,10 @@ static int build_simple_graph_instance(stringstream &ss) {
 		}
 	}
 	//fclose(fp_in);
+    if (!collection.empty()) { //
+        for (auto p: collection) free(p);
+        collection.clear();
+    }
 	NB_EDGE = nb_edge;
 	for (i = 1; i <= NB_NODE; i++) {
 		node_state[i] = ACTIVE;
@@ -226,10 +233,9 @@ static int build_simple_graph_instance(stringstream &ss) {
 
 	
 		none_degree[i] = NB_NODE - static_degree[i] - 1;
-        IF_FREE(none_neibors[i]);
 		none_neibors[i] = (int *) malloc(
 				(NB_NODE+2) * sizeof(int));
-
+        collection.push_back(none_neibors[i]); //
 	        node_neibors[i] = none_neibors[i] + none_degree[i]+1;
 
 		nb1 = 0;
