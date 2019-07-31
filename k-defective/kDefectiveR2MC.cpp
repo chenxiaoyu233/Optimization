@@ -12,7 +12,7 @@ void KDefectiveR2MC::AddEdgeByVector(const vector<pair<int, int> > &edges) {
 
 void KDefectiveR2MC::encodeGraph() {
     FILE *out = fopen(gf.c_str(), "w");
-    fprintf(out, "p %d word %lu %lu\n", size, edges.size(), edge_stack.size());
+    fprintf(out, "p word %d %lu\n", size, edges.size() + edge_stack.size());
     for (auto &e: edges) 
         fprintf(out, "e %d %d\n", e.first, e.second);
     for (auto &e: edge_stack) 
