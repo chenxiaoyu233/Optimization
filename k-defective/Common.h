@@ -15,6 +15,7 @@
 #include <bitset>
 #include <set>
 #include <cstdlib>
+#include <unistd.h>
 #include <ctime>
 #include <cstdint>
 
