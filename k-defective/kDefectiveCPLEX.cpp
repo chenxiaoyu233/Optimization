@@ -45,7 +45,9 @@ void KDefectiveCPLEX::solve(int k) {
         if (timeLimit >= 0) cplex.setParam(IloCplex::TiLim, timeLimit);
         if (cplex.solve()) {
             notFinish = cplex.getStatus() != IloAlgorithm::Status::Optimal;
-            ans = cplex.getObjValue();
+            IloNum ret = cplex.getObjValue();
+            cerr << "CPLEX OPTIMUM: " << ret << endl;
+            ans = int(ret + 1e-4);
         } else {
             notFinish = true;
             cerr << "no solution found" << endl;
