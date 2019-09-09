@@ -54,9 +54,10 @@ void KDefectiveCPLEX::solve(int k) {
         }
     } catch (IloException& ex) {
         cerr << "Error: " << ex << endl;
-    }
-    catch (...) {
+        notFinish = true;
+    } catch (...) {
         cerr << "Error" << endl;
+        notFinish = true;
     }
     env.end();
 }
