@@ -392,6 +392,8 @@ void SolveWork() {
 		fprintf(log, "size-of-search-tree: %lu\n", solver -> GetCount());
 		fprintf(log, "cost-of-time: %lfs\n", solver -> GetCostTime());
 		fprintf(log, "time-out-flag: %d\n", solver -> GetNotFinishFlag());
+        /* 这里有一个历史遗留问题, 其实time-out-flag为1表示的是未完成.
+         * 未完成的原因可能有很多种, 不一定只是时间耗尽 */
 		fprintf(log, "number-of-vertex-before-prework: %d\n", BN);
 		fprintf(log, "number-of-vertex-after-prework: %d\n", N);
 		fprintf(log, "ans lower bound: %d\n", globalArgs.maxKDefective);
