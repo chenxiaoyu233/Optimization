@@ -296,8 +296,10 @@ void SolveWork() {
 	// 去自环
 	dealSelfRing();
 	if (globalArgs.algoType == "OnlyRead") {
-		printf("number-of-edge-read-in: %lu\n", edges.size());
-		printf("number-of-vertex-before-prework: %d\n", N);
+        FILE *log = fopen(globalArgs.logFileName.c_str(), "w");
+		fprintf(log, "number-of-edge-read-in: %lu\n", edges.size());
+		fprintf(log, "number-of-vertex-before-prework: %d\n", N);
+        fclose(log);
 		return;
 	}
 
