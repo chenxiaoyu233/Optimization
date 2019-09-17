@@ -1,7 +1,7 @@
 
 import os
 
-cmd_t = 'KDefective -O generate -n \"{}\" -d \"{}\" -w {}'
+cmd_t = './KDefective -O generate -n \"{}\" -d \"{}\" -w {}'
 filename_t = 'RandomGraph-{}-{}'
 #                    size  density
 
