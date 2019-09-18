@@ -36,7 +36,8 @@ class Row:
                     'cost of time': 'X',
                     'time out flag': 'X',
                     'number of vertex before prework': 'X',
-                    'number of vertex after prework': 'X'}
+                    'number of vertex after prework': 'X',
+                    'ans lower bound': 'X'}
         self.__readFile(filename)
         self.__parseFileName(filename)
         # 优先使用参数传递的键值对
@@ -165,7 +166,7 @@ class FormGenerator:
                 RFlag = False
                 for algorithm in algorithms:
                     curDB = self.DB.Find({'algorithm': algorithm, 'datafile': datafile, 'k': str(k)})
-                    curT = self.timeToFloat(curDB.Rows[0].dic['cost of time']) if len(curDB.Rows) > 0 else 'X'
+                    curT = self.timeToFloat(curDB.Rows[0].dic['cost of time']) if len(curDB.Rows) > 0 and curDB.Rows[0].dic['time out flag'] == '0' else 'X'
                     if curT != 'X' and curT > 5:
                         LFlag = True
                     if curT != 'X' and curT < 18000:
@@ -177,6 +178,11 @@ class FormGenerator:
                 ret.append(datafile)
         return ret
 
+    def printTex(self, filename):
+        f = open(filename, "r")
+        print(f.read())
+        f.close()
+        
     def PrintFormSilm(self):
         """
         \hline
@@ -185,10 +191,20 @@ class FormGenerator:
                                 & 3 &X & X &X & X\\
                                 & 4 &X & X &X & X\\
         """
+        # print the shhead.tex
+        self.printTex('shhead.tex')
+        total_cnt = 0
+        gt100_cnt = 0
+        mean_times_cnt = 0
+        mean_times = 0 # GLPK 时间对MADEC+的平均倍数
         self.AddDirectory("Graph-Info/result")
+        self.AddDirectory('GraphInfo-DEMACS/')
         datafiles = self.DB.ValueSetOfKey('datafile')
-        algorithms = ['Base', 'Base-noImprove', 'RDS', 'IP']
+        algorithms = ['Base', 'Base-noImprove', 'RDS', 'CPLEX']
         datafiles = self.DropDataFiles(datafiles, algorithms)
+        # print the shead.tex
+        self.printTex('shead.tex')
+        tabular_line_cnt = 0
         for datafile in datafiles:
             print("\\hline")
             print("\\multirow{{{}}}{{*}}{{{}}}".format(
@@ -196,7 +212,7 @@ class FormGenerator:
                 datafile,
                 ))
             for k in range(1, 5):
-                if k == 3: 
+                if k == 3:
                     print("\\multirow{{{}}}{{*}}{{({}, {})}}".format(
                         2,
                         self.DB.Find({'algorithm': 'OnlyRead', 'datafile': datafile}).Rows[0].dic['number of vertex before prework'],
@@ -205,20 +221,83 @@ class FormGenerator:
 
                 print(' & {}'.format(k), end = ' ')
                 print(' & {}'.format(self.DB.Find({'algorithm': 'Base-noImprove', 'datafile': datafile, 'k': str(k)}).Rows[0].dic['ans lower bound']), end = ' ')
-                print(' & {}'.format(self.DB.Find({'algorithm': 'Base', 'datafile': datafile, 'k': str(k)}).Rows[0].dic['ans']), end = ' ')
+                #print(' & {}'.format(self.DB.Find({'algorithm': 'Base', 'datafile': datafile, 'k': str(k)}).Rows[0].dic['ans']), end = ' ')
+                ans = 'X'
+                for algo in algorithms:
+                    if len(self.DB.Find({'datafile': datafile, 'k': str(k), 'algorithm': algo}).Rows) == 0:
+                        continue
+                    row = self.DB.Find({'datafile': datafile, 'k': str(k), 'algorithm': algo}).Rows[0]
+                    if row.dic['time out flag'] != 'X' and row.dic['time out flag'] == '0':
+                        ans = row.dic['ans']
+                print(' & {}'.format(ans), end = ' ')
+                
+                times = []
                 for algorithm in algorithms:
                     tmp = self.DB.Find({'algorithm': algorithm, 'datafile': datafile, 'k': str(k)}).Rows
                     cur = 'X'
                     if len(tmp) > 0:
                         cur = tmp[0].dic['cost of time']
-                        if cur != 'X':
+                        if cur != 'X' and tmp[0].dic['time out flag'] == '0':
                             cur = float(cur[0:-1])
-                            if cur > 18000:
-                                cur = '$>$18k'
                         else: 
                             cur = 'X'
-                    print(' & {}'.format(cur), end = ' ')
+                    #print(' & {}'.format(cur), end = ' ')
+                    times.append(cur)
+
+                # 计算倍数
+                if (times[0] != 'X' and times[0] != 0 and times[3] != 'X'):
+                    mean_times_cnt += 1
+                    mean_times += float(times[3]) / float(times[0])
+                    if (float(times[3]) / float(times[0]) >= 100):
+                        gt100_cnt += 1
+                if (times[3] == 'X'):
+                    gt100_cnt += 1
+                    total_cnt += 1
+                    
+
+                minTime = 1e10
+                whe = 0
+                cnt = 0
+                flag = 0
+                for i in range(len(times)):
+                    if times[i] == 'X':
+                        continue
+                    if minTime > times[i]:
+                        minTime = times[i]
+                        whe = i
+                    times[i] = float('{:.2f}'.format(times[i]));
+                    if times[i] < 0.015:
+                        times[i] = '0.0'
+                        cnt += 1
+                    elif times[i] > 18000:
+                        times[i] = '$>$18k'
+                    else:
+                        flag = 1
+                        times[i] = '{:.2f}'.format(times[i]);
+                if cnt < 2 and flag == 1:
+                    times[whe] = '\\textbf{{{}}}'.format(times[whe])
+
+                # 打印时间
+                for time in times:
+                   print(' & {}'.format(time), end = ' ')
                 print('\\\\')
+            tabular_line_cnt = tabular_line_cnt + 1
+            if tabular_line_cnt == 15:
+                self.printTex('stail.tex')
+                self.printTex('shead.tex')
+                tabular_line_cnt = 0
+
+        self.printTex('stail.tex')
+        self.printTex('sttail.tex')
+        
+        # 输出GLPK相对于MADEC+的平均倍数
+        print(mean_times)
+        print(mean_times_cnt)
+        print(mean_times / mean_times_cnt)
+        total_cnt += mean_times_cnt
+        print(total_cnt)
+        print(gt100_cnt)
+        print(gt100_cnt / total_cnt)
 
 
 def GetFormDataBase():
@@ -232,6 +311,14 @@ def GetFormDataBase():
     form.AddDirectory('RDS/result/')
     form.AddDirectory('Ip/result/')
     form.AddDirectory('Base-noImprove/result/', {'algorithm': 'Base-noImprove'})
+    form.AddDirectory('CPLEX/result/')
+
+    # DEMACS 2th
+    form.AddDirectory('Base-DEMACS/')
+    form.AddDirectory('Base-NoImprove-DEMACS/', {'algorithm': 'Base-noImprove'})
+    form.AddDirectory('RDS-DEMACS/')
+    form.AddDirectory('CPLEX-DEMACS/')
+
 
     return form
     
