@@ -1,3 +1,4 @@
+#ifdef INTEGER_PROGRAMMING_SOLVER
 #include "kDefectiveIP.h"
 
 KDefectiveIP::KDefectiveIP(int n): KDefectiveBase(n) {
@@ -219,3 +220,5 @@ int KDefectiveIP::Solve(int k) {
     fprintf(stderr, "%lu\n", count);
 	return ans;
 }
+
+#endif

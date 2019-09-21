@@ -340,18 +340,22 @@ void SolveWork() {
 		if (globalArgs.algoType == "Base") solver = new STLSetImplement<set<int>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
+        else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
+#ifdef INTEGER_PROGRAMMING_SOLVER
 		else if (globalArgs.algoType == "IP") solver = new STLSetImplement<set<int>, KDefectiveIP>(N);
         else if (globalArgs.algoType == "CPLEX") solver = new STLSetImplement<set<int>, KDefectiveCPLEX>(N);
-        else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
         //else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<set<int>, KDefectiveGurobi>(N);
+#endif
 	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
 		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveBase>(N);
 		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
+        else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
+#ifdef INTEGER_PROGRAMMING_SOLVER
 		else if (globalArgs.algoType == "IP") solver = new BitSetImplement<bitset<16000>, KDefectiveIP>(N);
         else if (globalArgs.algoType == "CPLEX") solver = new STLSetImplement<set<int>, KDefectiveCPLEX>(N);
-        else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
         //else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<bitset<int>, KDefectiveGurobi>(N);
+#endif
 	}
 
 	// 判断solver是否构造成功

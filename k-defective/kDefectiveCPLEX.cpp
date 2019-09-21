@@ -1,3 +1,4 @@
+#ifdef INTEGER_PROGRAMMING_SOLVER
 #include "kDefectiveCPLEX.h"
 
 KDefectiveCPLEX::KDefectiveCPLEX(int n): KDefectiveBase(n) {
@@ -74,3 +75,5 @@ int KDefectiveCPLEX::Solve(int k) {
     fprintf(stderr, "%lu\n", count);
     return ans;
 }
+
+#endif

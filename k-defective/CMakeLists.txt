@@ -21,11 +21,12 @@ endif (NDEBUG)
 
 set (CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
-# build a static package to fit the cluster
-if (UNIX)
-    #set (CMAKE_CXX_FLAGS "-static ${CMAKE_CXX_FLAGS}")
-endif (UNIX)
+# 整数规划开关
+option (IP_SOLVER "enable the IP Solvers" OFF)
 
+if (IP_SOLVER)
+    # enable IP Solvers in source code
+    set (CMAKE_CXX_FLAGS "-DINTEGER_PROGRAMMING_SOLVER ${CMAKE_CXX_FLAGS}")
 # 配置AMPL库
 #SET (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 #include_directories ("${CMAKE_SOURCE_DIR}/amplapi/include/")
@@ -33,8 +34,8 @@ endif (UNIX)
 #set (CMAKE_INSTALL_RPATH "${CMAKE_SOURCE_DIR}/amplapi/lib")
 
 # 配置glpk库
-include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
-link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
+    include_directories ("${CMAKE_SOURCE_DIR}/glpk/include")
+    link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 
 # 配置Gurobi环境
 # if (APPLE)
@@ -48,32 +49,29 @@ link_directories ("${CMAKE_SOURCE_DIR}/glpk/lib")
 # include_directories ("${GUROBI_INCLUDE_DIR}")
 # link_directories ("${GUROBI_LIB_DIR}")
 
-set (CMAKE_CXX_FLAGS "-DIL_STD ${CMAKE_CXX_FLAGS}")
+    set (CMAKE_CXX_FLAGS "-DIL_STD ${CMAKE_CXX_FLAGS}")
 # setting cplex environmenet on cluster
-if (UNIX)
-    include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/include")
-    link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/lib/x86-64_linux/static_pic")
-    include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/include")
-    link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/lib/x86-64_linux/static_pic")
-endif (UNIX)
-
+    if (UNIX)
+        include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/include")
+        link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/cplex/lib/x86-64_linux/static_pic")
+        include_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/include")
+        link_directories ("/opt/ibm/ILOG/CPLEX_Studio129/concert/lib/x86-64_linux/static_pic")
+    endif (UNIX)
+endif (IP_SOLVER)
 
 # 搜集根目录下的所有源文件
 aux_source_directory (. source_list)
 
 # 编译生成可执行文件
 add_executable (KDefective ${source_list})
-#target_link_libraries (KDefective ampl)
-# if (APPLE)
-#     target_link_libraries (KDefective glpk gurobi_c++ gurobi81)
-# elseif (UNIX)
-#     target_link_libraries (KDefective glpk gurobi_g++5.2 gurobi81)
-# endif (APPLE)
-if (APPLE)
-    target_link_libraries (KDefective glpk)
-elseif (UNIX)
-    target_link_libraries (KDefective glpk ilocplex concert cplex m pthread dl)
-endif (APPLE)
+
+if (IP_SOLVER)
+    if (APPLE)
+        target_link_libraries (KDefective glpk)
+    elseif (UNIX)
+        target_link_libraries (KDefective glpk ilocplex concert cplex m pthread dl)
+    endif (APPLE)
+endif (IP_SOLVER)
 
 # 安装
 set (CMAKE_INSTALL_PREFIX ".")
