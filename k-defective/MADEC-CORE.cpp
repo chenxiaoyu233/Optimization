@@ -6,7 +6,8 @@ const int SIZE_E = 10000;
 typedef bitset<SIZE_V> Vset;
 
 static int size;
-static Vset N[SIZE_V]; // Neighbor of each vertex in G
+static Vset N[SIZE_V];  // Neighbor of each vertex in G
+static Vset NC[SIZE_V]; // Neighbor of each vertex in G^c
 static Vset N2[SIZE_V]; // $N^2[v] \cup N[v]$ of each vertex v in G
 static int CE_P_[SIZE_V];  // number of cost edges between P and v
 static int CE_Cp_[SIZE_V]; // number of cost edges between Cp and v
@@ -112,10 +113,13 @@ void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, in
     CE_Cp_Cp = CE_Cp_P = CE_P_P = 0;
     for (int i = 0; i < size; ++i) {
         N[i].reset();
+        NC[i].set(); NC[i].reset(i);
     }
     for (auto &e : edges) {
         N[e.first].set(e.second);
+        NC[e.first].reset(e.second);
         N[e.second].set(e.first);
+        NC[e.second].reset(e.first);
     }
 
     /* build the adjacant list */
@@ -220,6 +224,39 @@ inline void addv (int v) {
     }
 }
 
+inline int color_bound() {
+    Vset C = Cm | Cp;
+    list<int> lv, part;
+    for (int v = 0; v < size; ++v)
+        if (C[v]) lv.push_back(v);
+
+    while(!lv.empty()) {
+        Vset cur = C;
+        int cnt = 0;
+        for (list<int>::iterator it = lv.begin(); it != lv.end(); ) {
+            if (cur[*it]) {
+                ++cnt;
+                cur &= NC[*it];
+                C.reset(*it);
+                it = lv.erase(it);
+            } else ++it;
+        }
+        part.push_back(cnt);
+    }
+    
+    int UB = 0, cnt = 0, m = k - CE_P_P;
+    while(m >= cnt) {
+        for (auto sz: part) if (sz > 0 && m >= cnt) {
+            m -= cnt;
+            -- sz;
+            ++ UB;
+        }
+        ++cnt;
+    }
+
+    return UB + sizeP;
+}
+
 void MADEC() {
     ++TREE_SIZE;
     
@@ -271,6 +308,10 @@ void MADEC() {
     }
 
     if (!sizeC) return;
+    if (sizeC + sizeP <= LB) return;
+
+    /* coloring bound */
+    if (color_bound() <= LB) return;
 
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp > k) {
         /* branching rule 1 */
