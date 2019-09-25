@@ -1,7 +1,7 @@
 #include "Common.h"
 
 const int SIZE_V = 1000;
-const int SIZE_E = 10000;
+const int SIZE_E = SIZE_V * SIZE_V;
 
 typedef bitset<SIZE_V> Vset;
 
@@ -11,9 +11,10 @@ static Vset NC[SIZE_V]; // Neighbor of each vertex in G^c
 static Vset N2[SIZE_V]; // $N^2[v] \cup N[v]$ of each vertex v in G
 static int CE_P_[SIZE_V];  // number of cost edges between P and v
 static int CE_Cp_[SIZE_V]; // number of cost edges between Cp and v
-static int CE_P_P, CE_Cp_P, CE_Cp_Cp; // number of cost edges between X and Y
+static int CE_Cm_[SIZE_V]; // number of cost edges between Cm and v
+static int CE_P_P, CE_Cp_P, CE_Cp_Cp, CE_Cm_Cm, CE_Cm_Cp;// number of cost edges between X and Y
 
-static int sizeP, sizeC, sizeN[SIZE_V];
+static int sizeP, sizeC, sizeN[SIZE_V], sizeNC[SIZE_V];
 static Vset P;
 static Vset Cm, Cp; // C+, C-
 static int lP[SIZE_V], cnt_lP;
@@ -23,7 +24,7 @@ int TREE_SIZE; // the size of the search tree;
 static int k; // the k in k-defective
 
 static bool two_hop_flag; // do we need the 2-hop reduction
-const int TWO_HOP_THRESHOLD = 10;
+const int TWO_HOP_THRESHOLD = 0;
 
 static int AdjB[SIZE_E*2]; // total memory buffer to store adjacent list
 static int AdjP[SIZE_V+1]; // pointer of each adjacent list
@@ -110,7 +111,6 @@ void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, in
     TREE_SIZE = 0;
     P.reset();
     Cm.set(); Cp.reset();
-    CE_Cp_Cp = CE_Cp_P = CE_P_P = 0;
     for (int i = 0; i < size; ++i) {
         N[i].reset();
         NC[i].set(); NC[i].reset(i);
@@ -134,41 +134,63 @@ void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, in
 
     /* init some aux parameters */
     sizeP = 0; sizeC = size;
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < size; ++i) {
         sizeN[i] = AdjP[i+1] - AdjP[i];
+        sizeNC[i] = NAdjP[i+1] - NAdjP[i];
+    }
     LB = _LB;
     k = _k;
     two_hop_flag = true;
+
+    /* init CE (number of cost edges */
+    CE_Cp_Cp = CE_Cp_P = CE_P_P = CE_Cm_Cp = CE_Cm_Cm = 0;
+    for (int v = 0; v < size; ++v) {
+        CE_Cm_Cm += sizeNC[v];
+        CE_Cm_[v] = sizeNC[v];
+    }
+    CE_Cm_Cm >>= 1;
 }
 
 inline void in_Cp(int v) {
     CE_Cp_Cp += CE_Cp_[v];
     CE_Cp_P += CE_P_[v];
+    CE_Cm_Cp += CE_Cm_[v];
     FOR_C_NA(v, u) ++CE_Cp_[u];
 }
 
 inline void out_Cp(int v) {
     CE_Cp_Cp -= CE_Cp_[v];
     CE_Cp_P -= CE_P_[v];
+    CE_Cm_Cp -= CE_Cm_[v];
     FOR_C_NA(v, u) --CE_Cp_[u];
+}
+
+inline void in_Cm(int v) {
+    CE_Cm_Cm += CE_Cm_[v];
+    CE_Cm_Cp += CE_Cp_[v];
+    FOR_C_NA(v, u) ++CE_Cm_[u];
+}
+
+inline void out_Cm(int v) {
+    CE_Cm_Cm -= CE_Cm_[v];
+    CE_Cm_Cp -= CE_Cp_[v];
+    FOR_C_NA(v, u) --CE_Cm_[u];
 }
 
 inline void add_from_Cm_to_Cp(int v) {
     Cm.reset(v); Cp.set(v);
-    in_Cp(v);
+    out_Cm(v); in_Cp(v);
 }
 
 inline void add_from_Cp_to_Cm(int v) {
     Cp.reset(v); Cm.set(v);
-    out_Cp(v);
+    out_Cp(v); in_Cm(v);
 }
 
 inline void add2P(int v) {
     P.set(v); ++sizeP;
-    if(Cp[v]) {
-        Cp.reset(v);
-        out_Cp(v);
-    } else Cm.reset(v);
+    if(Cp[v]) {Cp.reset(v); out_Cp(v);}
+    else {Cm.reset(v); out_Cm(v);}
     --sizeC;
 
     CE_P_P += CE_P_[v];
@@ -184,10 +206,8 @@ inline void add2P(int v) {
 
 inline void add2C(int v) {
     P.reset(v); --sizeP;
-    if (CE_P_[v] > 0) {
-        Cp.set(v);
-        in_Cp(v);
-    } else Cm.set(v);
+    if (CE_P_[v] > 0) {Cp.set(v); in_Cp(v);}
+    else {Cm.set(v); in_Cm(v);}
     ++sizeC;
 
     CE_P_P -= CE_P_[v];
@@ -206,22 +226,16 @@ static Vset dCm, dCp; // for recover
 inline void delv (int v) {
     --sizeC;
     FOR_NA(v, u) --sizeN[u];
-    if (Cm[v]) {Cm.reset(v); dCm.set(v);}
-    if (Cp[v]) {
-        Cp.reset(v); dCp.set(v);
-        out_Cp(v);
-    }
+    if (Cm[v]) {Cm.reset(v); dCm.set(v); out_Cm(v);}
+    if (Cp[v]) {Cp.reset(v); dCp.set(v); out_Cp(v);}
 }
 
 /* add v to G */
 inline void addv (int v) {
     ++sizeC;
     FOR_NA(v, u) ++sizeN[u];
-    if (dCm[v]) {dCm.reset(v); Cm.set(v);}
-    if (dCp[v]) {
-        dCp.reset(v); Cp.set(v);
-        in_Cp(v);
-    }
+    if (dCm[v]) {dCm.reset(v); Cm.set(v); in_Cm(v);}
+    if (dCp[v]) {dCp.reset(v); Cp.set(v); in_Cp(v);}
 }
 
 inline int color_bound() {
@@ -263,19 +277,35 @@ void MADEC() {
     /* reduction 1 */
     if (CE_P_P > k) return;
 
+    list<int> del_list;
+
     /* reduction 2 */
     for (int v = 0; v < size; ++v)
         if ((Cp[v] || Cm[v]) && sizeN[v] == sizeP + sizeC - 1) {
-            add2P(v); MADEC(); add2C(v);
-            return;
+            add2P(v); del_list.push_back(v);
         }
+    if (!del_list.empty()) {
+        MADEC();
+        while (!del_list.empty()) {
+            add2C(del_list.back());
+            del_list.pop_back();
+        }
+        return;
+    }
 
     /* reduction 3 */
     for (int v = 0; v < size; ++v)
         if ((Cp[v] || Cm[v]) && CE_P_[v] > k - CE_P_P) {
-            delv(v); MADEC(); addv(v);
-            return;
+            delv(v); del_list.push_back(v);
         }
+    if (!del_list.empty()) {
+        MADEC();
+        while (!del_list.empty()) {
+            addv(del_list.back());
+            del_list.pop_back();
+        }
+        return;
+    }
 
     /* 2-hop reduction */
     if (two_hop_flag && k - CE_P_P && LB > k && sizeP) {
@@ -309,6 +339,15 @@ void MADEC() {
 
     if (!sizeC) return;
     if (sizeC + sizeP <= LB) return;
+
+    /* reduction: if we could add C to P directly */
+    if (CE_P_P + CE_Cp_P + CE_Cp_Cp + CE_Cm_Cp + CE_Cm_Cm <= k) {
+        if (LB < sizeP + sizeC) {
+            LB = sizeP + sizeC;
+            fprintf(stderr, "new LB: %d @ RC2P\n", LB);
+        }
+        return;
+    }
 
     /* coloring bound */
     if (color_bound() <= LB) return;
