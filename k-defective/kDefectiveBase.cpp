@@ -650,7 +650,7 @@ void KDefectiveBase::solve(void *_P, void *_C, int k, int m) {
 	if (m != 0 && k < ans && state.top().sizeP != 0) this -> reductionByDiam(P, C, k);
 	//this -> reductionByDiam(P, C, k);
 
-	if (state.top().sizeC + state.top().sizeP <= ans || !this -> reductionByC2P(P, C, m)) {
+	if (state.top().sizeC + state.top().sizeP > ans && !this -> reductionByC2P(P, C, m)) {
 
 		// cut brunch
 		//printf("sizeof(P): %d, sizeof(C): %d\n", sizeOfSet(P), sizeOfSet(C));
