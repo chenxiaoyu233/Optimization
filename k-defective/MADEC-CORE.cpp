@@ -7,6 +7,7 @@ typedef bitset<SIZE_V> Vset;
 
 static int size;
 static Vset N[SIZE_V]; // Neighbor of each vertex in G
+static Vset N2[SIZE_V]; // $N^2[v] \cup N[v]$ of each vertex v in G
 static int CE_P_[SIZE_V];  // number of cost edges between P and v
 static int CE_Cp_[SIZE_V]; // number of cost edges between Cp and v
 static int CE_P_P, CE_Cp_P, CE_Cp_Cp; // number of cost edges between X and Y
@@ -19,6 +20,9 @@ static int lP[SIZE_V], cnt_lP;
 int LB; // the lower bound of the maximum k-defective
 int TREE_SIZE; // the size of the search tree;
 static int k; // the k in k-defective
+
+static bool two_hop_flag; // do we need the 2-hop reduction
+const int TWO_HOP_THRESHOLD = 10;
 
 static int AdjB[SIZE_E*2]; // total memory buffer to store adjacent list
 static int AdjP[SIZE_V+1]; // pointer of each adjacent list
@@ -118,12 +122,19 @@ void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, in
     build_adjacent_table(edges, AdjB, AdjP);
     build_non_adjacent_table(edges);
 
+    /* build the $N^2[v] \cup N[v]$ for each vertex */
+    for (int v = 0; v < size; ++v) {
+        N2[v] |= N[v];
+        FOR_NA(v, u) N2[v] |= N[u];
+    }
+
     /* init some aux parameters */
     sizeP = 0; sizeC = size;
     for (int i = 0; i < size; ++i)
         sizeN[i] = AdjP[i+1] - AdjP[i];
     LB = _LB;
     k = _k;
+    two_hop_flag = true;
 }
 
 inline void in_Cp(int v) {
@@ -229,11 +240,37 @@ void MADEC() {
             return;
         }
 
+    /* 2-hop reduction */
+    if (two_hop_flag && k - CE_P_P && LB > k && sizeP) {
+        Vset valid;
+        for (int i = 0; i < cnt_lP; ++i)
+            valid |= N2[lP[i]];
+        list<int> del_list;
+        for (int v = 0; v < size; ++v)
+            if ((Cm[v] || Cp[v]) && !valid[v]) {
+                del_list.push_back(v);
+                delv(v);
+            }
+        
+        bool tmp = two_hop_flag;
+        if (del_list.size() < TWO_HOP_THRESHOLD) two_hop_flag = false;
+        if (!del_list.empty()) MADEC();
+        two_hop_flag = tmp;
+        
+        while(!del_list.empty()) {
+            addv(del_list.back());
+            del_list.pop_back();
+        }
+        if (!del_list.empty()) return;
+    }
+
     /* update ans */
     if (LB < sizeP) {
         LB = sizeP;
         fprintf(stderr, "new LB: %d\n", LB);
     }
+
+    if (!sizeC) return;
 
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp > k) {
         /* branching rule 1 */

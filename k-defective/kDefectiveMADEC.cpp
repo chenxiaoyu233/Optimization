@@ -17,7 +17,8 @@ int KDefectiveMADEC::Solve(int k) {
     notFinish = false;
 
     MADEC();
-
+    
+    count = TREE_SIZE;
     ed = clock();
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
     fprintf(stderr, "%lu\n", count);
