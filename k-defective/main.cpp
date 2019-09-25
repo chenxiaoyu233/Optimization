@@ -337,7 +337,7 @@ void SolveWork() {
 
 	// 创建求解器
 	if (globalArgs.dataStructure == "Set") {
-		if (globalArgs.algoType == "Base") solver = new STLSetImplement<set<int>, KDefectiveBase>(N);
+		if (globalArgs.algoType == "Base") solver = new STLSetImplement<set<int>, KDefectiveMADEC>(N);
 		else if (globalArgs.algoType == "RDS") solver = new STLSetImplement<set<int>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new STLSetImplement<set<int>, KDefectiveSimple>(N);
         else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
@@ -347,7 +347,7 @@ void SolveWork() {
         //else if (globalArgs.algoType == "Gurobi") solver = new STLSetImplement<set<int>, KDefectiveGurobi>(N);
 #endif
 	} else if (globalArgs.dataStructure == "Bitset" && N <= 5000) {
-		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveBase>(N);
+		if (globalArgs.algoType == "Base") solver = new BitSetImplement<bitset<16000>, KDefectiveMADEC>(N);
 		else if (globalArgs.algoType == "RDS") solver = new BitSetImplement<bitset<16000>, KDefectiveRDS>(N);
 		else if (globalArgs.algoType == "Simple") solver = new BitSetImplement<bitset<16000>, KDefectiveSimple>(N);
         else if (globalArgs.algoType == "R2MC") solver = new STLSetImplement<set<int>, KDefectiveR2MC>(N);
