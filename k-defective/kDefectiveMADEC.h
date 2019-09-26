@@ -9,6 +9,7 @@ private:
     vector<pair<int, int> > edges;
 public:
     KDefectiveMADEC(int n);
+    bool TimeIsUp();
     virtual void AddEdgeByVector(const vector<pair<int, int> > &edges);
     virtual int Solve(int k);
 };

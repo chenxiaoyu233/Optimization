@@ -1,4 +1,7 @@
 #include "Common.h"
+#include "kDefectiveMADEC.h"
+
+KDefectiveMADEC *controller;
 
 const int SIZE_V = 1000;
 const int SIZE_E = SIZE_V * SIZE_V;
@@ -385,6 +388,8 @@ void bb_color(Vset C, int *U, int *color) {
 }
 
 void bb_max_clq(Vset P, Vset C) {
+    if (controller -> TimeIsUp()) return;
+
     ++TREE_SIZE;
     int sizeC = C.count();
     int *U = new int[sizeC]; 
@@ -407,6 +412,7 @@ void bb_max_clq(Vset P, Vset C) {
 }
 
 void MADEC() {
+    if (controller -> TimeIsUp()) return;
     //checker();
     
     ++TREE_SIZE;

@@ -11,6 +11,7 @@ void KDefectiveMADEC::AddEdgeByVector(const vector<pair<int ,int> > &edges) {
 }
 
 int KDefectiveMADEC::Solve(int k) {
+    controller = this;
     setup_instance(size, edges, ans, k);
     count = 0;
     st = clock();
@@ -23,4 +24,8 @@ int KDefectiveMADEC::Solve(int k) {
     fprintf(stderr, "time: %fms\n", float(ed-st)/CLOCKS_PER_SEC * 1000);
     fprintf(stderr, "%lu\n", count);
     return ans = LB;
+}
+
+bool KDefectiveMADEC::TimeIsUp() {
+    return timeIsUp();
 }
