@@ -15,6 +15,7 @@ static int CE_Cm_[SIZE_V]; // number of cost edges between Cm and v
 static int CE_P_P, CE_Cp_P, CE_Cp_Cp, CE_Cm_Cm, CE_Cm_Cp;// number of cost edges between X and Y
 
 static int sizeP, sizeC, sizeN[SIZE_V], sizeNC[SIZE_V];
+static int neiP[SIZE_V], neiC[SIZE_V]; // number of neighbors in P and C
 static Vset P;
 static Vset Cm, Cp; // C+, C-
 static int lP[SIZE_V], cnt_lP;
@@ -97,6 +98,28 @@ void build_non_adjacent_table(vector<pair<int, int> > edges) {
     build_adjacent_table(edges, NAdjB, NAdjP);
 }
 
+pair<int, int> order[SIZE_V];
+int ord_map[SIZE_V];
+int cmp_order(const pair<int, int> &a, const pair<int, int> &b) {
+    return a.second > b.second;
+}
+/* find an order to accumulate the algorithm, the remap each vertex by the order */
+void get_order_then_remap(int size, const vector<pair<int, int> > &_edges, vector<pair<int, int> > &edges) {
+    /* get the order by degree */
+    for (auto &e: _edges) {
+        ++order[e.first].second;
+        ++order[e.second].second;
+    }
+    for (int i = 0; i < size; ++i) order[i].first = i;
+    sort(order, order + size, cmp_order);
+
+    /* remap vertex */
+    for (int i = 0; i < size; ++i) ord_map[order[i].first] = i;
+    for (auto &e: _edges) {
+        edges.push_back(make_pair(ord_map[e.first], ord_map[e.second]));
+    }
+}
+
 /* use a list of edges to build the problem in our manner
  * @param size : the number of vertices in the graph
  * @param edges: vector of all edges in the graph
@@ -105,7 +128,11 @@ void build_non_adjacent_table(vector<pair<int, int> > edges) {
  * @note: the graph should not contain isolated point
  * @note: the graph should be simple
  */
-void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, int _k) {
+void setup_instance(int _size, const vector<pair<int, int> > &_edges, int _LB, int _k) {
+    /* reorder the graph */
+    vector<pair<int, int> > edges;
+    get_order_then_remap(_size, _edges, edges);
+
     /* build the bitset of the whole graph */
     size = _size;
     TREE_SIZE = 0;
@@ -135,7 +162,7 @@ void setup_instance(int _size, const vector<pair<int, int> > &edges, int _LB, in
     /* init some aux parameters */
     sizeP = 0; sizeC = size;
     for (int i = 0; i < size; ++i) {
-        sizeN[i] = AdjP[i+1] - AdjP[i];
+        neiC[i] = sizeN[i] = AdjP[i+1] - AdjP[i];
         sizeNC[i] = NAdjP[i+1] - NAdjP[i];
     }
     LB = _LB;
@@ -196,6 +223,8 @@ inline void add2P(int v) {
     CE_P_P += CE_P_[v];
     lP[cnt_lP++] = v;
 
+    FOR_NA(v, u) {--neiC[u]; ++neiP[u];}
+
     FOR_C_NA(v, u) {
         if (Cm[u] || Cp[u]) ++CE_Cp_P;
         if (CE_P_[u] == 0 && Cm[u])
@@ -213,6 +242,8 @@ inline void add2C(int v) {
     CE_P_P -= CE_P_[v];
     --cnt_lP;
 
+    FOR_NA(v, u) {++neiC[u]; --neiP[u];}
+
     FOR_C_NA(v, u) {
         --CE_P_[u];
         if (Cp[u] || Cm[u]) --CE_Cp_P;
@@ -225,7 +256,7 @@ inline void add2C(int v) {
 static Vset dCm, dCp; // for recover
 inline void delv (int v) {
     --sizeC;
-    FOR_NA(v, u) --sizeN[u];
+    FOR_NA(v, u) {--sizeN[u]; --neiC[u];}
     if (Cm[v]) {Cm.reset(v); dCm.set(v); out_Cm(v);}
     if (Cp[v]) {Cp.reset(v); dCp.set(v); out_Cp(v);}
 }
@@ -233,7 +264,7 @@ inline void delv (int v) {
 /* add v to G */
 inline void addv (int v) {
     ++sizeC;
-    FOR_NA(v, u) ++sizeN[u];
+    FOR_NA(v, u) {++sizeN[u]; ++neiC[u];}
     if (dCm[v]) {dCm.reset(v); Cm.set(v); in_Cm(v);}
     if (dCp[v]) {dCp.reset(v); Cp.set(v); in_Cp(v);}
 }
@@ -271,64 +302,95 @@ inline int color_bound() {
     return UB + sizeP;
 }
 
+void checker() {
+    /* CE_P_P */
+    int re_CE_P_P = 0;
+    for (int v = 0; v < size; ++v) if (P[v])
+        FOR_C_NP(v, u) re_CE_P_P += 1;
+    re_CE_P_P >>= 1;
+    assert(re_CE_P_P == CE_P_P);
+
+    /* CE_Cp_P */
+    int re_CE_Cp_P = 0;
+    for (int v = 0; v < size; ++v)
+        if (Cp[v]) FOR_C_NP(v, u) re_CE_Cp_P += 1;
+    assert(re_CE_Cp_P == CE_Cp_P);
+
+    /* CE_Cp_Cp */
+    int re_CE_Cp_Cp = 0;
+    for (int v = 0; v < size; ++v)
+        if (Cp[v]) FOR_C_NA(v, u) if (Cp[u]) ++re_CE_Cp_Cp;
+    re_CE_Cp_Cp >>= 1;
+    assert(re_CE_Cp_Cp == CE_Cp_Cp);
+
+    /* CE_Cm_Cp */
+    int re_CE_Cm_Cp = 0;
+    for (int v = 0; v < size; ++v)
+        if (Cm[v]) FOR_C_NA(v, u) if (Cp[u]) ++re_CE_Cm_Cp;
+    assert(re_CE_Cm_Cp == CE_Cm_Cp);
+
+    /* CE_Cm_Cm */
+    int re_CE_Cm_Cm = 0;
+    for (int v = 0; v < size; ++v)
+        if (Cm[v]) FOR_C_NA(v, u) if (Cm[u]) ++re_CE_Cm_Cm;
+    re_CE_Cm_Cm >>= 1;
+    assert(re_CE_Cm_Cm == CE_Cm_Cm);
+
+    /* neiC */
+    for (int v = 0; v < size; ++v) {
+        int re_neiC = 0;
+        FOR_NC(v, u) re_neiC += 1;
+        assert(re_neiC == neiC[v]);
+    }
+
+    /* neiP */
+    for (int v = 0; v < size; ++v) {
+        int re_neiP = 0;
+        FOR_NP(v, u) re_neiP += 1;
+        assert(re_neiP == neiP[v]);
+    }
+
+    /* sizeC */
+    int re_sizeC = 0;
+    for (int v = 0; v < size; ++v) if(Cm[v] || Cp[v]) ++re_sizeC;
+    assert(re_sizeC == sizeC);
+
+    /* sizeP */
+    int re_sizeP = 0;
+    for (int v = 0; v < size; ++v) if (P[v]) ++re_sizeP;
+    assert(re_sizeP == sizeP);
+}
+
 void MADEC() {
-    ++TREE_SIZE;
+    //checker();
     
     /* reduction 1 */
     if (CE_P_P > k) return;
 
-    list<int> del_list;
+    list<int> del_list, add2P_list;
 
     /* reduction 2 */
     for (int v = 0; v < size; ++v)
         if ((Cp[v] || Cm[v]) && sizeN[v] == sizeP + sizeC - 1) {
-            add2P(v); del_list.push_back(v);
+            add2P(v); add2P_list.push_back(v);
         }
-    if (!del_list.empty()) {
-        MADEC();
-        while (!del_list.empty()) {
-            add2C(del_list.back());
-            del_list.pop_back();
-        }
-        return;
-    }
 
     /* reduction 3 */
     for (int v = 0; v < size; ++v)
         if ((Cp[v] || Cm[v]) && CE_P_[v] > k - CE_P_P) {
             delv(v); del_list.push_back(v);
         }
-    if (!del_list.empty()) {
-        MADEC();
-        while (!del_list.empty()) {
-            addv(del_list.back());
-            del_list.pop_back();
-        }
-        return;
-    }
 
     /* 2-hop reduction */
     if (two_hop_flag && k - CE_P_P && LB > k && sizeP) {
         Vset valid;
         for (int i = 0; i < cnt_lP; ++i)
             valid |= N2[lP[i]];
-        list<int> del_list;
         for (int v = 0; v < size; ++v)
             if ((Cm[v] || Cp[v]) && !valid[v]) {
                 del_list.push_back(v);
                 delv(v);
             }
-        
-        bool tmp = two_hop_flag;
-        if (del_list.size() < TWO_HOP_THRESHOLD) two_hop_flag = false;
-        if (!del_list.empty()) MADEC();
-        two_hop_flag = tmp;
-        
-        while(!del_list.empty()) {
-            addv(del_list.back());
-            del_list.pop_back();
-        }
-        if (!del_list.empty()) return;
     }
 
     /* update ans */
@@ -337,8 +399,8 @@ void MADEC() {
         fprintf(stderr, "new LB: %d\n", LB);
     }
 
-    if (!sizeC) return;
-    if (sizeC + sizeP <= LB) return;
+    if (!sizeC) goto finish;
+    if (sizeC + sizeP <= LB) goto finish;
 
     /* reduction: if we could add C to P directly */
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp + CE_Cm_Cp + CE_Cm_Cm <= k) {
@@ -346,41 +408,47 @@ void MADEC() {
             LB = sizeP + sizeC;
             fprintf(stderr, "new LB: %d @ RC2P\n", LB);
         }
-        return;
+        goto finish;
     }
 
     /* coloring bound */
-    if (color_bound() <= LB) return;
+    if (color_bound() <= LB) goto finish;
+
+    ++TREE_SIZE;
 
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp > k) {
         /* branching rule 1 */
-        vector<int> vec;
+        vector<pair<int, int> > vec;
         for (int v = 0; v < size; ++v)
-            if (Cp[v]) vec.push_back(v);
-        /* currently, we use the random order */
-        random_shuffle(vec.begin(), vec.end());
+            if (Cp[v]) vec.push_back(make_pair(v, CE_P_[v]));
+        sort(vec.begin(), vec.end(), cmp_order);
         int pt = 0;
         for (int vec_size = vec.size(); pt < vec_size; ++pt) {
-            if (CE_P_P + CE_P_[vec[pt]] > k) break;
-            add2P(vec[pt]);
+            if (CE_P_P + CE_P_[vec[pt].first] > k) break;
+            add2P(vec[pt].first);
         }
         for (; pt >= 0; --pt) {
-            delv(vec[pt]); MADEC(); addv(vec[pt]);
-            if (pt > 0) add2C(vec[pt-1]);
+            delv(vec[pt].first); MADEC(); addv(vec[pt].first);
+            if (pt > 0) add2C(vec[pt-1].first);
         }
     } else {
         /* branching rule 2 */
-        for (int v = 0; v < size; ++v)
-            if (Cm[v]) {
-                add2P(v); MADEC(); add2C(v);
-                delv(v); MADEC(); addv(v);
-                return;
-            }
-        for (int v = 0; v < size; ++v)
-            if (Cp[v]) {
-                add2P(v); MADEC(); add2C(v);
-                delv(v); MADEC(); addv(v);
-                return;
-            }
+        int whe = -1;
+        for (int v = 0; v < size; ++v) if (Cm[v] || Cp[v]) {
+            if (whe == -1) whe = v;
+            else if (neiC[whe] > neiC[v]) whe = v;
+        }
+        add2P(whe); MADEC(); add2C(whe);
+        delv(whe); MADEC(); addv(whe);
+    }
+
+finish:
+    while (!del_list.empty()) {
+        addv(del_list.back());
+        del_list.pop_back();
+    }
+    while (!add2P_list.empty()) {
+        add2C(add2P_list.back());
+        add2P_list.pop_back();
     }
 }
