@@ -3,7 +3,7 @@
 
 KDefectiveMADEC *controller;
 
-const int SIZE_V = 1000;
+const int SIZE_V = 20000;
 const int SIZE_E = SIZE_V * SIZE_V;
 
 typedef bitset<SIZE_V> Vset;
