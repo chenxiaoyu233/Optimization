@@ -137,10 +137,12 @@ void setup_instance(int _size, const vector<pair<int, int> > &_edges, int _LB, i
     size = _size;
     TREE_SIZE = 0;
     P.reset();
-    Cm.set(); Cp.reset();
+    for (int v = 0; v < size; ++v) Cm.set(v);
+    Cp.reset();
     for (int i = 0; i < size; ++i) {
         N[i].reset();
-        NC[i].set(); NC[i].reset(i);
+        for (int v = 0; v < size; ++v) NC[i].set(v);
+        NC[i].reset(i);
     }
     for (auto &e : edges) {
         N[e.first].set(e.second);
@@ -361,9 +363,59 @@ void checker() {
     assert(re_sizeP == sizeP);
 }
 
+void bb_color(Vset C, int *U, int *color) {
+    int cnt_color = 0, pt = 0;
+    list<int> lv;
+    for (int v = 0; v < size; ++v)
+        if (C[v]) lv.push_back(v);
+
+    while(!lv.empty()) {
+        Vset cur = C;
+        ++cnt_color;
+        for (list<int>::iterator it = lv.begin(); it != lv.end(); ) {
+            if (cur[*it]) {
+                cur &= NC[*it];
+                C.reset(*it);
+                U[pt] = *it;
+                color[pt++] = cnt_color;
+                it = lv.erase(it);
+            } else ++it;
+        }
+    }
+}
+
+void bb_max_clq(Vset P, Vset C) {
+    ++TREE_SIZE;
+    int sizeC = C.count();
+    int *U = new int[sizeC]; 
+    int *color = new int[sizeC];
+    bb_color(C, U, color);
+    for (int i = sizeC - 1; i >= 0; --i) {
+        if (color[i] + P.count() <= LB) return;
+        Vset nC = C;
+        int v = U[i];
+        P.set(v); nC &= N[v];
+        if (LB < P.count()) LB = P.count();
+        if (nC.any()) bb_max_clq(P, nC);
+        P.reset(v); C.reset(v);
+    }
+    delete[] U;
+    delete[] color;
+}
+
 void MADEC() {
     //checker();
     
+    ++TREE_SIZE;
+
+    /* degenerate to max clique */
+    if (k == CE_P_P) {
+        Vset NP; NP.set();
+        for (int v = 0; v < size; ++v) if (P[v]) NP &= N[v];
+        bb_max_clq(P, (Cm | Cp) & NP);
+        return;
+    }
+
     /* reduction 1 */
     if (CE_P_P > k) return;
 
@@ -413,8 +465,6 @@ void MADEC() {
 
     /* coloring bound */
     if (color_bound() <= LB) goto finish;
-
-    ++TREE_SIZE;
 
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp > k) {
         /* branching rule 1 */
