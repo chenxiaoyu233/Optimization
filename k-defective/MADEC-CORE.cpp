@@ -395,7 +395,10 @@ void bb_max_clq(Vset P, Vset C) {
         Vset nC = C;
         int v = U[i];
         P.set(v); nC &= N[v];
-        if (LB < P.count()) LB = P.count();
+        if (LB < P.count()) {
+            LB = P.count();
+            fprintf(stderr, "new LB: %d @ MAX CLIQUE\n", LB);
+        }
         if (nC.any()) bb_max_clq(P, nC);
         P.reset(v); C.reset(v);
     }
