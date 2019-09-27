@@ -3,8 +3,8 @@
 
 KDefectiveMADEC *controller;
 
-const int SIZE_V = 20000;
-const int SIZE_E = SIZE_V * SIZE_V;
+const int SIZE_V = 15000;
+const int SIZE_E = 1200000;
 
 typedef bitset<SIZE_V> Vset;
 
@@ -308,7 +308,6 @@ inline int color_bound() {
 }
 
 void checker() {
-#ifndef NDEBUG
     /* CE_P_P */
     int re_CE_P_P = 0;
     for (int v = 0; v < size; ++v) if (P[v])
@@ -365,7 +364,6 @@ void checker() {
     int re_sizeP = 0;
     for (int v = 0; v < size; ++v) if (P[v]) ++re_sizeP;
     assert(re_sizeP == sizeP);
-#endif
 }
 
 void bb_color(Vset C, int *U, int *color) {
