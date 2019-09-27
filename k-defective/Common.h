@@ -18,6 +18,7 @@
 #include <unistd.h>
 #include <ctime>
 #include <cstdint>
+#include <cassert>
 
 using namespace std;
 
