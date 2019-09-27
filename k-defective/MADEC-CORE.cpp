@@ -308,6 +308,7 @@ inline int color_bound() {
 }
 
 void checker() {
+#ifndef NDEBUG
     /* CE_P_P */
     int re_CE_P_P = 0;
     for (int v = 0; v < size; ++v) if (P[v])
@@ -364,6 +365,7 @@ void checker() {
     int re_sizeP = 0;
     for (int v = 0; v < size; ++v) if (P[v]) ++re_sizeP;
     assert(re_sizeP == sizeP);
+#endif
 }
 
 void bb_color(Vset C, int *U, int *color) {
