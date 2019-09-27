@@ -14,7 +14,7 @@ endif (APPLE)
 # 调试开关
 option (NDEBUG "disable the debug" OFF)
 if (NDEBUG)
-	set (CMAKE_CXX_FLAGS "-O2 ${CMAKE_CXX_FLAGS}")
+	set (CMAKE_CXX_FLAGS "-O2 -DNDEBUG ${CMAKE_CXX_FLAGS}")
 else (NDEBUG)
 	set (CMAKE_CXX_FLAGS "-ggdb ${CMAKE_CXX_FLAGS}")
 endif (NDEBUG)
