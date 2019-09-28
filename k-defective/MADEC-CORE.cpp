@@ -396,7 +396,7 @@ void bb_max_clq(Vset P, Vset C) {
     int *color = new int[sizeC];
     bb_color(C, U, color);
     for (int i = sizeC - 1; i >= 0; --i) {
-        if (color[i] + P.count() <= LB) return;
+        if (color[i] + P.count() <= LB) goto bb_finish;
         Vset nC = C;
         int v = U[i];
         P.set(v); nC &= N[v];
@@ -407,6 +407,8 @@ void bb_max_clq(Vset P, Vset C) {
         if (nC.any()) bb_max_clq(P, nC);
         P.reset(v); C.reset(v);
     }
+
+bb_finish:
     delete[] U;
     delete[] color;
 }
