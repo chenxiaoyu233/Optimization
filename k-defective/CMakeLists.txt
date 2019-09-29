@@ -11,6 +11,8 @@ elseif (UNIX)
     SET (CMAKE_CXX_COMPILER "g++")
 endif (APPLE)
 
+set (CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
+
 # 调试开关
 option (NDEBUG "disable the debug" OFF)
 if (NDEBUG)

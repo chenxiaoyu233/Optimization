@@ -4,7 +4,6 @@
 KDefectiveMADEC *controller;
 
 const int SIZE_V = 15000;
-const int SIZE_E = 1200000;
 
 typedef bitset<SIZE_V> Vset;
 
@@ -27,13 +26,10 @@ int LB; // the lower bound of the maximum k-defective
 int TREE_SIZE; // the size of the search tree;
 static int k; // the k in k-defective
 
-static bool two_hop_flag; // do we need the 2-hop reduction
-const int TWO_HOP_THRESHOLD = 0;
-
-static int AdjB[SIZE_E*2]; // total memory buffer to store adjacent list
+static int *AdjB; // total memory buffer to store adjacent list
 static int AdjP[SIZE_V+1]; // pointer of each adjacent list
 
-static int NAdjB[SIZE_E*2]; // total memory buffer to store non-adjacent list
+static int *NAdjB; // total memory buffer to store non-adjacent list
 static int NAdjP[SIZE_V+1]; // pointer of each non-adjacent list
 
 /* macro to iterate the adjacent table */
@@ -64,13 +60,15 @@ int cmp_edges(const pair<int, int> &a, const pair<int, int> &b) {
  * @param AdjB : buffer to store all the edges
  * @param AdjP : pointer to access neighbors of a given vertex
  */
-void build_adjacent_table(const vector<pair<int, int> > &edges, int *AdjB, int *AdjP) {
+void build_adjacent_table(const vector<pair<int, int> > &edges, int **_AdjB, int *AdjP) {
     vector<pair<int, int> > edges_alter;
     for (auto &e : edges) {
         edges_alter.push_back(e);
         edges_alter.push_back(make_pair(e.second, e.first));
     }
     sort(edges_alter.begin(), edges_alter.end(), cmp_edges);
+    int size_edge = edges_alter.size();
+    int *AdjB = new int[size_edge];
     int curP = 0, curV = -1;
     for (auto &e: edges_alter) {
         if (e.first != curV) {
@@ -83,6 +81,8 @@ void build_adjacent_table(const vector<pair<int, int> > &edges, int *AdjB, int *
     }
     for (curV += 1; curV <= size; ++curV)
         AdjP[curV] = curP;
+    
+    *_AdjB = AdjB;
 }
 
 void build_non_adjacent_table(vector<pair<int, int> > edges) {
@@ -98,7 +98,7 @@ void build_non_adjacent_table(vector<pair<int, int> > edges) {
             edges.push_back(make_pair(i, j));
         }
     delete[] graph;
-    build_adjacent_table(edges, NAdjB, NAdjP);
+    build_adjacent_table(edges, &NAdjB, NAdjP);
 }
 
 pair<int, int> order[SIZE_V];
@@ -155,7 +155,7 @@ void setup_instance(int _size, const vector<pair<int, int> > &_edges, int _LB, i
     }
 
     /* build the adjacant list */
-    build_adjacent_table(edges, AdjB, AdjP);
+    build_adjacent_table(edges, &AdjB, AdjP);
     build_non_adjacent_table(edges);
 
     /* build the $N^2[v] \cup N[v]$ for each vertex */
@@ -172,7 +172,6 @@ void setup_instance(int _size, const vector<pair<int, int> > &_edges, int _LB, i
     }
     LB = _LB;
     k = _k;
-    two_hop_flag = true;
 
     /* init CE (number of cost edges */
     CE_Cp_Cp = CE_Cp_P = CE_P_P = CE_Cm_Cp = CE_Cm_Cm = 0;
@@ -445,7 +444,7 @@ void MADEC() {
         }
 
     /* 2-hop reduction */
-    if (two_hop_flag && k - CE_P_P && LB > k && sizeP) {
+    if (k - CE_P_P && LB > k && sizeP) {
         Vset valid;
         for (int i = 0; i < cnt_lP; ++i)
             valid |= N2[lP[i]];
