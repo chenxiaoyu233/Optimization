@@ -11,7 +11,14 @@ elseif (UNIX)
     SET (CMAKE_CXX_COMPILER "g++")
 endif (APPLE)
 
+
 set (CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
+
+# 扩栈开关
+option (CUSTOM_HUGE_STACK "enable huge stack" ON)
+if (CUSTOM_HUGE_STACK)
+  set (CMAKE_CXX_FLAGS "-DCUSTOM_HUGE_STACK ${CMAKE_CXX_FLAGS}")
+endif (CUSTOM_HUGE_STACK)
 
 # 调试开关
 option (NDEBUG "disable the debug" OFF)

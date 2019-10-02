@@ -442,6 +442,17 @@ void Work() {
 }
 
 int main(int argc, char** argv) {
+#ifdef CUSTOM_HUGE_STACK
+    size_t size = 256ll << 20; // 256MB
+    char *p = (new char[size]) + size;
+    #if (defined _WIN64) or (defined __unix) or (defined __APPLE__)
+        __asm__("movq %0, %%rsp\n" :: "r"(p));
+    #else
+        __asm__("movl %0, %%esp\n" :: "r"(p));
+    #endif
+    fprintf(stderr, "Custom Huge Stack: enable\n");
+#endif
+
 	// 初始化各项参数
 	InitGlobalArgs();
 
@@ -523,7 +534,9 @@ int main(int argc, char** argv) {
 	if (globalArgs.disableColorReduction) fprintf(stderr, "disable color\n");
 	// 开始工作
 	Work();
-
+#ifdef CUSTOM_HUGE_STACK
+    exit(0);
+#endif
 	return 0;
 }
 

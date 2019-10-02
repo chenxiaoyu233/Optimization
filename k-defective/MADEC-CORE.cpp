@@ -386,32 +386,45 @@ void bb_color(Vset C, int *U, int *color) {
     }
 }
 
-void bb_max_clq(Vset P, Vset C) {
-    if (controller -> TimeIsUp()) return;
+struct bb_content {Vset P, C, nC;};
+stack<bb_content> bb_stack;
+void bb_max_clq() {
+    if (controller -> TimeIsUp()) {
+        bb_stack.pop();
+        return;
+    };
+    Vset &P = bb_stack.top().P;
+    Vset &C = bb_stack.top().C;
 
     ++TREE_SIZE;
     int sizeC = C.count();
-    int *U = new int[sizeC]; 
+    int *U = new int[sizeC];
     int *color = new int[sizeC];
     bb_color(C, U, color);
     for (int i = sizeC - 1; i >= 0; --i) {
         if (color[i] + P.count() <= LB) goto bb_finish;
-        Vset nC = C;
+        Vset &nC = bb_stack.top().nC;
+        nC = C;
         int v = U[i];
         P.set(v); nC &= N[v];
         if (LB < P.count()) {
             LB = P.count();
             fprintf(stderr, "new LB: %d @ MAX CLIQUE\n", LB);
         }
-        if (nC.any()) bb_max_clq(P, nC);
+        if (nC.any()) {
+            bb_stack.push({P, nC, Vset()});
+            bb_max_clq();
+        }
         P.reset(v); C.reset(v);
     }
 
 bb_finish:
     delete[] U;
     delete[] color;
+    bb_stack.pop();
 }
-
+/* temp variable used in MADEC() */
+Vset NP, valid;
 void MADEC() {
     if (controller -> TimeIsUp()) return;
     //checker();
@@ -420,9 +433,11 @@ void MADEC() {
 
     /* degenerate to max clique */
     if (k == CE_P_P) {
-        Vset NP; NP.set();
+        NP.set();
         for (int v = 0; v < size; ++v) if (P[v]) NP &= N[v];
-        bb_max_clq(P, (Cm | Cp) & NP);
+        bb_stack.push({P, (Cm | Cp) & NP, Vset()});
+        //bb_max_clq(P, (Cm | Cp) & NP);
+        bb_max_clq();
         return;
     }
 
@@ -445,7 +460,7 @@ void MADEC() {
 
     /* 2-hop reduction */
     if (k - CE_P_P && LB > k && sizeP) {
-        Vset valid;
+        valid.reset();
         for (int i = 0; i < cnt_lP; ++i)
             valid |= N2[lP[i]];
         for (int v = 0; v < size; ++v)
