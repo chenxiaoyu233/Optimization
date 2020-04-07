@@ -266,6 +266,15 @@ void discreteVertex() {
 	}
 }
 
+void WriteGraph() {
+    // 注意从1开始编号 
+    FILE *out = fopen(globalArgs.writeFileName.c_str(), "w");
+    fprintf(out, "p %d %d\n", N, M);
+    for(auto &e: edges)
+        fprintf(out, "e %d %d\n", e.first + 1, e.second + 1);
+    fclose(out);
+}
+
 void SolveWork() {
 	if (!HaveEnoughArgs("rptaDk")) return;
 	KDefectiveBase *solver = NULL;
@@ -334,6 +343,12 @@ void SolveWork() {
 		fprintf(stderr, "finish prework\n");
 		fprintf(stderr, "number of vertex after prework: %d\n", N);
 	}
+
+    if (globalArgs.op == "convert") {
+        M = edges.size();
+        WriteGraph();
+        return;
+    }
 
 	// 创建求解器
 	if (globalArgs.dataStructure == "Set") {
@@ -430,7 +445,7 @@ void Work() {
 	}
 
 	// 根据需要做的工作进行分流
-	if (globalArgs.op == "solve") {
+	if (globalArgs.op == "solve" || globalArgs.op == "convert") {
 		SolveWork();
 	} else if (globalArgs.op == "generate") {
 		GenerateWork();
