@@ -29,3 +29,11 @@ int KDefectiveMADEC::Solve(int k) {
 bool KDefectiveMADEC::TimeIsUp() {
     return timeIsUp();
 }
+
+void KDefectiveMADEC::EnableDiamReduction(bool isEnable) {
+    diamFlag = isEnable;
+}
+
+void KDefectiveMADEC::EnableColoringReduction(bool isEnable) {
+    colorFlag = isEnable;
+}

@@ -459,6 +459,7 @@ void MADEC() {
         }
 
     /* 2-hop reduction */
+    if (controller -> diamFlag)
     if (k - CE_P_P && LB > k && sizeP) {
         valid.reset();
         for (int i = 0; i < cnt_lP; ++i)
@@ -489,6 +490,7 @@ void MADEC() {
     }
 
     /* coloring bound */
+    if (controller -> colorFlag)
     if (color_bound() <= LB) goto finish;
 
     if (CE_P_P + CE_Cp_P + CE_Cp_Cp > k) {
